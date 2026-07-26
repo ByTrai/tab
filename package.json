@@ -17,6 +17,7 @@
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
     "start": "next start",
+    "test:extension": "node --test apps/extension/test/*.test.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
