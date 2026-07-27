@@ -1,49 +1,194 @@
 # Tabby
 
-Tabby is an open-source, local-first workspace for links, notes, and lightweight tasks. The current release is a functional web alpha: it works without an account, stores data in IndexedDB, searches instantly, supports multiple workspaces and groups, and imports/exports a versioned JSON backup.
+Tabby is an open-source, local-first workspace for links, notes, and lightweight tasks. It currently includes two independently runnable clients:
 
-## Run locally
+- a Next.js web alpha for organizing workspaces, groups, links, and notes; and
+- a dependency-free Chromium Manifest V3 extension that inventories the current window and performs restart-safe tab capture.
+
+Both clients work locally without an account. Synchronization, collaboration, and hosted production infrastructure are intentionally deferred. See [`roadmap.md`](roadmap.md) for the remaining work, topic ownership, and delivery order.
+
+> **Alpha warning:** browser data is stored in IndexedDB and can be lost when site or extension storage is cleared. Export a JSON backup before testing destructive browser/profile operations.
+
+## Current capabilities
+
+### Web workspace
+
+- Create, rename, reorder, and delete workspaces and groups.
+- Create links, notes, and lightweight tasks.
+- Search the local workspace.
+- Import and export versioned JSON backups.
+- Persist entirely in browser IndexedDB with starter data on first launch.
+
+### Chromium extension
+
+- Replace the new-tab page with a current-window tab inventory.
+- Select ordinary HTTP(S) tabs while excluding pinned and restricted tabs by default.
+- Persist a capture operation before closing selected tabs.
+- Recover incomplete operations after a Manifest V3 worker restart.
+- Undo captures using a local IndexedDB journal.
+- Request only the `tabs` permission; no content scripts or host permissions are used.
+
+The web and extension share dependency-free workspace contracts and URL safety rules. They do **not** yet share one database or present the same complete UI.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 20 or newer.
+- npm 10 (the repository currently declares npm 10.9.3).
+- Chrome, Chromium, Brave, or Edge for extension development.
+- Docker or Podman only if working on the PostgreSQL-backed server/auth code.
+
+## Quick start: local web workspace
+
+The local workspace route does not need PostgreSQL or OAuth.
 
 ```bash
+git clone <repository-url>
+cd tab
 npm install
 cp .env.example .env
 npm run dev
 ```
 
-Open `http://localhost:3000`. Database and OAuth configuration are not required for the local workspace.
+Open <http://localhost:3000>. If you intentionally do not configure the server-side environment and environment validation blocks a command, run that command with `SKIP_ENV_VALIDATION=1`; do not use that bypass for hosted or authentication work.
+
+```bash
+SKIP_ENV_VALIDATION=1 npm run dev
+```
 
 ## Load the Chromium extension
 
-1. Open `chrome://extensions` and enable **Developer mode**.
-2. Choose **Load unpacked** and select `apps/extension`.
-3. Open a new tab. Tabby shows the current window inventory; ordinary HTTP(S) tabs are selected by default while pinned and restricted tabs remain unselected.
+The current extension is deliberately build-free.
 
-The extension is dependency-free and does not need a build command. It requests only the `tabs` permission, stores captures and its restart-safe operation journal in extension IndexedDB, and has no content scripts or host permissions.
+1. Open `chrome://extensions` (or the equivalent page in your Chromium browser).
+2. Enable **Developer mode**.
+3. Select **Load unpacked**.
+4. Choose the repository's `apps/extension` directory.
+5. Open a new tab.
 
-## Quality checks
+After changing extension files, return to the extensions page and select **Reload** on Tabby. Reloading an extension during capture is a useful recovery test, but export important data first.
+
+## Optional: server and database development
+
+Server/auth work uses PostgreSQL, Drizzle, Better Auth, and GitHub OAuth. Copy `.env.example` to `.env`, replace every placeholder, then start the local database:
+
+```bash
+./start-database.sh
+npm run db:push
+npm run dev
+```
+
+Environment variables:
+
+| Variable | Purpose | Required for local-only UI? |
+| --- | --- | --- |
+| `DATABASE_URL` | PostgreSQL connection used by Drizzle | No |
+| `BETTER_AUTH_SECRET` | Server-side session signing secret | No |
+| `BETTER_AUTH_GITHUB_CLIENT_ID` | GitHub OAuth application ID | No |
+| `BETTER_AUTH_GITHUB_CLIENT_SECRET` | GitHub OAuth secret | No |
+
+Never commit `.env`, real credentials, exports containing browsing data, or test fixtures derived from private user data. When adding a variable, update both `.env.example` and the validation schema in `src/env.js`.
+
+### Database commands
+
+```bash
+npm run db:generate  # generate migrations after schema changes
+npm run db:migrate   # apply committed migrations
+npm run db:push      # push schema directly during local prototyping
+npm run db:studio    # inspect the local database
+```
+
+Prefer committed migrations for changes intended to merge. Treat `db:push` as a local development convenience, not a deployment procedure.
+
+## Repository structure
+
+```text
+.
+├── apps/extension/                 # build-free MV3 extension
+│   ├── background.js               # worker entry point and recovery wiring
+│   ├── browser-adapter.js          # narrow wrapper around Chromium APIs
+│   ├── core.js                     # capture/undo orchestration
+│   ├── repository.js               # IndexedDB capture journal
+│   ├── newtab.{html,css,js}        # current extension UI
+│   ├── packages/workspace-contracts/ # shared entities, limits, URLs, migrations
+│   ├── test/                       # Node unit/contract tests
+│   └── e2e/                        # loaded-extension browser scenarios
+├── src/
+│   ├── app/                        # Next.js App Router pages and route handlers
+│   │   └── _components/workspace-app.tsx # current client workspace shell
+│   ├── lib/workspace.ts            # web domain validation/search/starter data
+│   ├── lib/workspace-store.ts      # web IndexedDB persistence boundary
+│   ├── server/                     # tRPC, auth, and Drizzle/Postgres code
+│   ├── styles/                     # global styles and Tailwind entry point
+│   └── trpc/                       # React/server tRPC integration
+├── docs/
+│   ├── adr/                        # accepted architectural decisions
+│   ├── plans/                      # focused implementation plans
+│   ├── product-review/             # product assumptions and review notes
+│   └── threat-model/               # security/privacy boundaries
+├── changelog/                      # task handoffs required by this project
+├── roadmap.md                      # topic-based, assignable remaining roadmap
+└── package.json                    # root scripts and npm workspace declaration
+```
+
+### Architectural boundaries
+
+1. Keep product invariants and transformations outside React and browser API adapters.
+2. UI code calls commands; it must not directly coordinate durable writes and tab closure.
+3. Persist capture state before mutating browser tabs. A UI success state is not proof of durability.
+4. Keep direct `chrome.*` calls inside the browser adapter.
+5. Validate imports and cross-boundary payloads. Treat URLs, titles, notes, favicons, and exports as untrusted input.
+6. Do not add permissions, analytics, external favicon requests, remote extension code, or sync behavior without an ADR and privacy/security review.
+7. Preserve backward compatibility with existing IndexedDB and export schema versions; add migration fixtures before changing persisted shapes.
+
+Read the ADRs in `docs/adr` before changing these boundaries. The staged Plasmo direction is documented in `docs/adr/0003-adopt-plasmo-in-stages.md`; the current build-free extension remains the production baseline until the parity gates pass.
+
+## Development workflow
+
+1. Pick one unowned topic card from `roadmap.md` and add an owner such as `@tommy` or `@romeo`.
+2. Confirm its dependencies are complete and declare the files/directories the task expects to touch.
+3. Use a short-lived branch. Avoid mixing refactors, generated migrations, and UI features in one pull request.
+4. Add risk-proportionate tests, including failure/restart cases for persistence and browser operations.
+5. Run the checks below and manually exercise user-visible browser behavior.
+6. Update the roadmap card and add `changelog/<feature>.md` using the required handoff sections.
+7. Open a focused pull request that explains data compatibility, permissions, security/privacy, and rollback impact.
+
+### Quality checks
 
 ```bash
 npm run format:check
 npm run typecheck
-npm run build
 npm run test:extension
+npm run build
 ```
 
-## Architecture
+Useful focused commands:
 
-- `src/app/_components/workspace-app.tsx` — accessible client experience and application commands.
-- `src/lib/workspace.ts` — framework-independent schema, validation, URL safety, search, and starter data.
-- `src/lib/workspace-store.ts` — transactional IndexedDB persistence boundary.
-- `apps/extension` — unpacked Manifest V3 extension, browser adapter, capture service, IndexedDB journal, and tests.
-- `docs/adr` — architectural decisions and deferred work.
-- `docs/threat-model` — privacy and security boundaries.
+```bash
+node --test apps/extension/test/core.test.js
+node --test apps/extension/test/contracts.test.js
+npm run format:write
+```
 
-The web alpha intentionally has no synchronization, telemetry, third-party favicon fetches, or broad browser permissions. Export a JSON backup before clearing browser storage. A Manifest V3 extension and safe browser-tab capture remain the next risk-first milestone.
+`npm run lint`/`npm run check` currently rely on the removed `next lint` command and are tracked as roadmap debt. Do not report those scripts as passing until they are replaced with direct ESLint invocation.
 
-## Product assumptions
+## Testing expectations
 
-In lieu of discovery interviews, Phase 0 proceeds with documented assumptions: tab-heavy users value safe capture/resume most; local-only use must be complete without signup; links, notes, and tasks may share a lightweight workspace; and data portability is mandatory. These assumptions need validation in product review and must not be represented as research findings.
+- **Domain/contracts:** unit tests for validation, normalization, limits, migrations, and replay/idempotency.
+- **IndexedDB:** transaction, quota, corruption, interrupted migration, and legacy fixture tests.
+- **Browser operations:** fake-adapter failure injection plus loaded-extension capture, close, restore, undo, and worker-restart scenarios.
+- **UI:** keyboard, focus, screen-reader announcements, reduced motion, zoom, and empty/error/loading states.
+- **Performance:** representative 1,000/10,000-item fixtures rather than tiny-only test data.
+- **Security:** unsafe URL schemes, credential-bearing URLs, malicious imports, permission/CSP diffs, dependency audit, and secret scanning.
 
-## Contributing and security
+## Contributing, security, and project status
 
-Please keep domain behavior outside React where possible, validate all imported data, and do not add analytics or browser permissions without an ADR and privacy review. Report security issues privately to maintainers rather than opening a public exploit report. The project license and final public security contact still require owner/legal confirmation before a production release.
+Contributions are welcome once repository governance files are added. Until then, coordinate in an issue before large changes so two contributors do not modify the same ownership boundary. The project name, OSI license, contribution policy, Code of Conduct, and private vulnerability-reporting contact are release blockers and must be resolved before describing the repository as public-release ready.
+
+Do not open a public issue containing an exploitable vulnerability, credentials, raw URLs, workspace content, or user exports. Contact a maintainer privately until `SECURITY.md` provides the final disclosure channel.
+
+Useful project documents:
+
+- [`roadmap.md`](roadmap.md) — remaining topic cards, dependencies, owners, and merge order.
+- [`docs/plans/plasmo-and-phase-2.md`](docs/plans/plasmo-and-phase-2.md) — staged extension migration plan.
+- [`docs/threat-model/local-alpha.md`](docs/threat-model/local-alpha.md) — current local security model.
+- [`docs/product-review/local-web-alpha.md`](docs/product-review/local-web-alpha.md) — product assumptions and review boundary.
