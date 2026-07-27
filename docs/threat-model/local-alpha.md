@@ -7,7 +7,7 @@ Saved URLs, titles, note/task text, workspace names, and exported backups can re
 ## Trust boundaries and controls
 
 - Imported JSON is untrusted: Zod enforces a versioned schema, field lengths, and collection limits; the UI caps files at 10 MB and asks before replacement.
-- Navigated URLs are untrusted: only normalized `http:` and `https:` URLs enter the store; links use `rel="noreferrer"`.
+- Navigated URLs are untrusted: the shared contract accepts only string `http:` and `https:` URLs, rejects embedded credentials, and applies the platform URL canonicalizer; links use `rel="noreferrer"`.
 - User text is rendered through React text nodes, not raw HTML.
 - No analytics, remote favicon request, page-content collection, or background sync exists.
 - Writes complete in one IndexedDB transaction before UI state reports success.
@@ -24,5 +24,8 @@ Browser profiles and exported files are not encrypted. Anyone with profile/file 
 - Pinned tabs are never passed to removal. Closure intent is journaled first so restart-time undo retains its recovery payload.
 - Titles and addresses are inserted using DOM text properties. Saved links open with `rel="noreferrer"`.
 - Duplicate comparison strips URL fragments. Query parameters remain because removing them can change resource identity.
+- The shared capture migration preserves legacy records and recovery metadata. Unknown schema versions fail closed instead of being silently replaced with empty state, reducing accidental local-data loss during downgrade or incompatible upgrades.
 
 Residual extension risks include unencrypted browser-profile data, storage quota exhaustion, extension removal deleting local data, and Chromium behavior that cannot make tab creation plus journal advancement one atomic transaction. Store publication still requires a manual permission/CSP review and real-browser failure testing.
+
+Legacy records are retained rather than revalidated destructively, so a URL captured by an older release may not satisfy today's credential restriction. Any future UI that navigates historical records must normalize and authorize again at the navigation boundary. URL canonicalization also does not determine whether an HTTP(S) destination is trustworthy; phishing, loopback, and private-network destinations remain possible without host-level policy.

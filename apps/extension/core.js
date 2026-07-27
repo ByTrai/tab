@@ -1,3 +1,8 @@
+import {
+  normalizeHttpUrl,
+  normalizedUrlKey,
+} from "./packages/workspace-contracts/index.js";
+
 export const RESTRICTED_PROTOCOLS = new Set([
   "about:",
   "chrome:",
@@ -13,7 +18,10 @@ export function classifyTab(tab) {
     return { capturable: false, reason: "This tab is no longer available." };
   }
   if (!tab.url) {
-    return { capturable: false, reason: "The browser did not expose this tab's address." };
+    return {
+      capturable: false,
+      reason: "The browser did not expose this tab's address.",
+    };
   }
 
   try {
@@ -26,20 +34,26 @@ export function classifyTab(tab) {
           : `The ${parsed.protocol} protocol is not supported.`,
       };
     }
-    return { capturable: true, normalizedUrl: parsed.toString() };
+    const normalizedUrl = normalizeHttpUrl(tab.url);
+    if (!normalizedUrl) {
+      return {
+        capturable: false,
+        reason: "Addresses containing credentials cannot be captured.",
+      };
+    }
+    return { capturable: true, normalizedUrl };
   } catch {
     return { capturable: false, reason: "This tab has an invalid address." };
   }
 }
 
-export function normalizedUrlKey(value) {
-  const url = new URL(value);
-  url.hash = "";
-  return url.toString();
-}
-
 export class CaptureService {
-  constructor({ browser, repository, now = () => new Date().toISOString(), createId = () => crypto.randomUUID() }) {
+  constructor({
+    browser,
+    repository,
+    now = () => new Date().toISOString(),
+    createId = () => crypto.randomUUID(),
+  }) {
     this.browser = browser;
     this.repository = repository;
     this.now = now;
@@ -51,7 +65,12 @@ export class CaptureService {
     return tabs.map((tab) => ({ ...tab, eligibility: classifyTab(tab) }));
   }
 
-  async capture({ commandId, tabIds, close = false, duplicatePolicy = "skip" }) {
+  async capture({
+    commandId,
+    tabIds,
+    close = false,
+    duplicatePolicy = "skip",
+  }) {
     if (!commandId || !Array.isArray(tabIds) || tabIds.length === 0) {
       throw new Error("Select at least one tab to save.");
     }
@@ -62,9 +81,14 @@ export class CaptureService {
     const requested = new Set(tabIds);
     const selected = current.filter((tab) => requested.has(tab.id));
     const rejected = selected.filter((tab) => !classifyTab(tab).capturable);
-    if (rejected.length > 0) throw new Error(`${rejected.length} selected tab(s) cannot be captured.`);
+    if (rejected.length > 0)
+      throw new Error(`${rejected.length} selected tab(s) cannot be captured.`);
 
-    const existingKeys = new Set((await this.repository.savedItems()).map((item) => normalizedUrlKey(item.url)));
+    const existingKeys = new Set(
+      (await this.repository.savedItems())
+        .map((item) => normalizedUrlKey(item.url))
+        .filter(Boolean),
+    );
     const duplicates = [];
     const items = [];
     for (const tab of selected) {
@@ -76,12 +100,15 @@ export class CaptureService {
         continue;
       }
       existingKeys.add(key);
+      const createdAt = this.now();
       items.push({
         id: this.createId(),
+        kind: "link",
         tabId: tab.id,
         url: eligibility.normalizedUrl,
         title: tab.title || new URL(eligibility.normalizedUrl).hostname,
-        capturedAt: this.now(),
+        capturedAt: createdAt,
+        createdAt,
         pinned: Boolean(tab.pinned),
         index: tab.index,
       });
@@ -101,8 +128,14 @@ export class CaptureService {
     await this.repository.commitCapture(operation, items);
 
     if (!close) return operation;
-    const closableIds = items.filter((item) => !item.pinned).map((item) => item.tabId);
-    const closing = { ...operation, stage: "closing", closedTabIds: closableIds };
+    const closableIds = items
+      .filter((item) => !item.pinned)
+      .map((item) => item.tabId);
+    const closing = {
+      ...operation,
+      stage: "closing",
+      closedTabIds: closableIds,
+    };
     // Persist closure intent and the undo payload before touching the browser. Recovery can safely
     // distinguish tabs that still exist if the worker is suspended during chrome.tabs.remove.
     await this.repository.updateOperation(closing);
@@ -114,18 +147,40 @@ export class CaptureService {
 
   async undo(commandId) {
     const operation = await this.repository.operation(commandId);
-    if (!operation) throw new Error("The capture operation is no longer available.");
+    if (!operation)
+      throw new Error("The capture operation is no longer available.");
     if (operation.stage === "undone") return operation;
 
     const closed = new Set(operation.closedTabIds);
     const openTabs = await this.browser.currentWindowTabs();
-    const openKeys = new Set(openTabs.filter((tab) => classifyTab(tab).capturable).map((tab) => normalizedUrlKey(tab.url)));
-    let undoing = { ...operation, stage: "undoing", restoredItemIds: operation.restoredItemIds ?? [] };
+    const openKeys = new Set(
+      openTabs
+        .filter((tab) => classifyTab(tab).capturable)
+        .map((tab) => normalizedUrlKey(tab.url))
+        .filter(Boolean),
+    );
+    let undoing = {
+      ...operation,
+      stage: "undoing",
+      restoredItemIds: operation.restoredItemIds ?? [],
+    };
     await this.repository.updateOperation(undoing);
     for (const item of [...operation.items].sort((a, b) => a.index - b.index)) {
-      if (!closed.has(item.tabId) || undoing.restoredItemIds.includes(item.id) || openKeys.has(normalizedUrlKey(item.url))) continue;
-      await this.browser.openTab({ url: item.url, pinned: item.pinned, index: item.index });
-      undoing = { ...undoing, restoredItemIds: [...undoing.restoredItemIds, item.id] };
+      if (
+        !closed.has(item.tabId) ||
+        undoing.restoredItemIds.includes(item.id) ||
+        openKeys.has(normalizedUrlKey(item.url))
+      )
+        continue;
+      await this.browser.openTab({
+        url: item.url,
+        pinned: item.pinned,
+        index: item.index,
+      });
+      undoing = {
+        ...undoing,
+        restoredItemIds: [...undoing.restoredItemIds, item.id],
+      };
       await this.repository.updateOperation(undoing);
     }
     await this.repository.removeItems(operation.items.map((item) => item.id));

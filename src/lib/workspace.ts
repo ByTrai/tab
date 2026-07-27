@@ -1,12 +1,18 @@
 import { z } from "zod";
+import {
+  CONTRACT_LIMITS,
+  ITEM_KINDS,
+  WORKSPACE_SCHEMA_VERSION,
+  normalizeHttpUrl,
+} from "../../apps/extension/packages/workspace-contracts/index.js";
 
 export const itemSchema = z.object({
   id: z.string().min(1),
   groupId: z.string().min(1),
-  kind: z.enum(["link", "note", "task"]),
-  title: z.string().max(500),
-  url: z.string().max(4096).optional(),
-  content: z.string().max(20_000).optional(),
+  kind: z.enum(ITEM_KINDS),
+  title: z.string().max(CONTRACT_LIMITS.itemTitle),
+  url: z.string().max(CONTRACT_LIMITS.url).optional(),
+  content: z.string().max(CONTRACT_LIMITS.content).optional(),
   completed: z.boolean().optional(),
   createdAt: z.string().datetime(),
 });
@@ -14,22 +20,22 @@ export const itemSchema = z.object({
 export const groupSchema = z.object({
   id: z.string().min(1),
   workspaceId: z.string().min(1),
-  title: z.string().min(1).max(100),
+  title: z.string().min(1).max(CONTRACT_LIMITS.groupTitle),
   collapsed: z.boolean().default(false),
 });
 
 export const workspaceSchema = z.object({
   id: z.string().min(1),
-  title: z.string().min(1).max(100),
+  title: z.string().min(1).max(CONTRACT_LIMITS.workspaceTitle),
   color: z.string().regex(/^#[0-9a-f]{6}$/i),
   archived: z.boolean().default(false),
 });
 
 export const workspaceDataSchema = z.object({
-  schemaVersion: z.literal(1),
-  workspaces: z.array(workspaceSchema).max(500),
-  groups: z.array(groupSchema).max(5_000),
-  items: z.array(itemSchema).max(50_000),
+  schemaVersion: z.literal(WORKSPACE_SCHEMA_VERSION),
+  workspaces: z.array(workspaceSchema).max(CONTRACT_LIMITS.workspaces),
+  groups: z.array(groupSchema).max(CONTRACT_LIMITS.groups),
+  items: z.array(itemSchema).max(CONTRACT_LIMITS.items),
 });
 
 export type WorkspaceData = z.infer<typeof workspaceDataSchema>;
@@ -38,7 +44,7 @@ export type Group = WorkspaceData["groups"][number];
 export type Item = WorkspaceData["items"][number];
 
 export const EMPTY_DATA: WorkspaceData = {
-  schemaVersion: 1,
+  schemaVersion: WORKSPACE_SCHEMA_VERSION,
   workspaces: [],
   groups: [],
   items: [],
@@ -49,14 +55,7 @@ export function createId() {
 }
 
 export function safeUrl(value: string): string | null {
-  try {
-    const url = new URL(value.trim());
-    return url.protocol === "http:" || url.protocol === "https:"
-      ? url.toString()
-      : null;
-  } catch {
-    return null;
-  }
+  return normalizeHttpUrl(value);
 }
 
 export function searchItems(data: WorkspaceData, query: string) {
@@ -78,9 +77,14 @@ export function createStarterData(): WorkspaceData {
   const inboxId = createId();
   const readingId = createId();
   return {
-    schemaVersion: 1,
+    schemaVersion: WORKSPACE_SCHEMA_VERSION,
     workspaces: [
-      { id: workspaceId, title: "My workspace", color: "#7157d9", archived: false },
+      {
+        id: workspaceId,
+        title: "My workspace",
+        color: "#7157d9",
+        archived: false,
+      },
     ],
     groups: [
       { id: inboxId, workspaceId, title: "Inbox", collapsed: false },
@@ -88,13 +92,20 @@ export function createStarterData(): WorkspaceData {
     ],
     items: [
       {
-        id: createId(), groupId: inboxId, kind: "note",
-        title: "Welcome to Tabby", content: "Links, notes, and tasks stay on this device. Add your first item below.",
+        id: createId(),
+        groupId: inboxId,
+        kind: "note",
+        title: "Welcome to Tabby",
+        content:
+          "Links, notes, and tasks stay on this device. Add your first item below.",
         createdAt: new Date().toISOString(),
       },
       {
-        id: createId(), groupId: inboxId, kind: "task",
-        title: "Review the sample workspace", completed: false,
+        id: createId(),
+        groupId: inboxId,
+        kind: "task",
+        title: "Review the sample workspace",
+        completed: false,
         createdAt: new Date().toISOString(),
       },
     ],
