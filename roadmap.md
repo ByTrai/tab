@@ -300,6 +300,8 @@ URLs and page titles may expose medical, financial, political, employer, or auth
 
 Dates should be assigned only after team capacity and browser targets are known. Gates are evidence-based rather than calendar-based.
 
+**Execution update (2026-07-26):** the safe-capture risk spike is complete. ADR 0003 selects a gated Plasmo migration because the roadmap will soon require multiple extension surfaces. The detailed sequence in `docs/plans/plasmo-and-phase-2.md` finishes shared contracts and Phase 1 parity before the Phase 2 popup/side-panel work; it does not pull synchronization forward.
+
 ### Phase 0 — Discovery and foundations
 
 **Goal:** agree on the product boundary and prevent early architectural rework.
@@ -525,4 +527,3 @@ A feature is not done until:
 5. Turn Phase 0 and Phase 1 into issues with acceptance scenarios, dependencies, and owners.
 6. Replace the starter README with project-specific setup, architecture, security, and contribution guidance.
 7. Implement one risk-first spike: persist selected tabs, verify, close, restart the MV3 worker, and undo.
-
