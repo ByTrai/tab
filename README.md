@@ -180,15 +180,20 @@ npm run format:write
 - **Performance:** representative 1,000/10,000-item fixtures rather than tiny-only test data.
 - **Security:** unsafe URL schemes, credential-bearing URLs, malicious imports, permission/CSP diffs, dependency audit, and secret scanning.
 
-## Contributing, security, and project status
+## Contributing, license, and project status
 
-Contributions are welcome once repository governance files are added. Until then, coordinate in an issue before large changes so two contributors do not modify the same ownership boundary. The project name, OSI license, contribution policy, Code of Conduct, and private vulnerability-reporting contact are release blockers and must be resolved before describing the repository as public-release ready.
+Contributions are welcome. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before starting and follow the [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) in every project space. Tabby is available under the permissive [MIT License](LICENSE).
+
+Coordinate in an issue before large changes so two contributors do not modify the same ownership boundary. Final name/trademark review, maintainer governance, and a dedicated private vulnerability-reporting contact remain release blockers before describing the repository as public-release ready.
 
 Do not open a public issue containing an exploitable vulnerability, credentials, raw URLs, workspace content, or user exports. Contact a maintainer privately until `SECURITY.md` provides the final disclosure channel.
 
 Useful project documents:
 
 - [`roadmap.md`](roadmap.md) — remaining topic cards, dependencies, owners, and merge order.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow and pull-request expectations.
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) — expected community behavior and reporting process.
+- [`LICENSE`](LICENSE) — MIT terms for using and contributing to Tabby.
 - [`docs/plans/plasmo-and-phase-2.md`](docs/plans/plasmo-and-phase-2.md) — staged extension migration plan.
 - [`docs/threat-model/local-alpha.md`](docs/threat-model/local-alpha.md) — current local security model.
 - [`docs/product-review/local-web-alpha.md`](docs/product-review/local-web-alpha.md) — product assumptions and review boundary.

@@ -78,15 +78,15 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T0.1 — Decide identity and legal foundation
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `in-progress`
 **Touch set:** root legal/community files, `docs/product-review/**`
 **Depends on:** none
 
 **Deliverables**
 
 - Confirm project name after trademark, package, repository, and domain checks.
-- Choose an OSI-approved license with counsel/owner review (MPL-2.0 and AGPL-3.0 have different adoption trade-offs).
-- Add `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, support boundaries, and DCO/CLA decision.
+- MIT license selected and added; confirm copyright attribution with the project owner before the first public release.
+- `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` added. `SECURITY.md`, support boundaries, and the DCO/CLA decision remain.
 - Define maintainer roles, issue/PR templates, decision process, and release ownership.
 - Record product terminology so web, extension, landing page, and store listing do not drift.
 
