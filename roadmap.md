@@ -176,7 +176,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T3.1 — Capability-based browser adapter
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done`
 **Touch set:** browser adapter/fakes/tests; avoid UI
 **Depends on:** T1.2 interface review
 

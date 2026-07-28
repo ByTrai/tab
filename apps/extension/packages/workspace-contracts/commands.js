@@ -38,7 +38,10 @@ export class DomainError extends Error {
    * @param {{ code?: string; cause?: unknown }} [options]
    */
   constructor(category, message, options = {}) {
-    super(message, options.cause !== undefined ? { cause: options.cause } : undefined);
+    super(
+      message,
+      options.cause !== undefined ? { cause: options.cause } : undefined,
+    );
     this.name = "DomainError";
     this.category = category;
     this.code = options.code;
@@ -105,14 +108,19 @@ export function applyCommand(context, command) {
     throw new DomainError("validation", "Command type is required.");
   }
   if (!isClientId(command.commandId)) {
-    throw new DomainError("validation", "commandId is required for idempotency.");
+    throw new DomainError(
+      "validation",
+      "commandId is required for idempotency.",
+    );
   }
 
   const trash = normalizeTrash(context.trash);
   const commandLog = Array.isArray(context.commandLog)
     ? context.commandLog.map(cloneLogEntry)
     : [];
-  const prior = commandLog.find((entry) => entry.commandId === command.commandId);
+  const prior = commandLog.find(
+    (entry) => entry.commandId === command.commandId,
+  );
   if (prior) {
     return {
       state: cloneState(context.state),
@@ -254,12 +262,22 @@ function dispatch(state, trash, command, now, createId) {
 
 /** @param {WorkspaceExportV2} state @param {CreateWorkspaceCommand} command */
 function createWorkspace(state, command, createId) {
-  const id = requireId(command.id ?? (createId ? createId() : undefined), "workspace");
+  const id = requireId(
+    command.id ?? (createId ? createId() : undefined),
+    "workspace",
+  );
   assertUniqueId(state, id);
   if (state.workspaces.length >= CONTRACT_LIMITS.workspaces) {
-    throw new DomainError("quota", "Workspace limit reached.", { code: "workspaces_quota" });
+    throw new DomainError("quota", "Workspace limit reached.", {
+      code: "workspaces_quota",
+    });
   }
-  const title = requireText(command.title, 1, CONTRACT_LIMITS.workspaceTitle, "workspace title");
+  const title = requireText(
+    command.title,
+    1,
+    CONTRACT_LIMITS.workspaceTitle,
+    "workspace title",
+  );
   const color = requireColor(command.color);
   const order = nextAppendOrder(state.workspaces);
   const workspace = { id, title, color, archived: false, order };
@@ -270,7 +288,12 @@ function createWorkspace(state, command, createId) {
 /** @param {WorkspaceExportV2} state @param {RenameWorkspaceCommand} command */
 function renameWorkspace(state, command) {
   const index = findIndex(state.workspaces, command.workspaceId, "workspace");
-  const title = requireText(command.title, 1, CONTRACT_LIMITS.workspaceTitle, "workspace title");
+  const title = requireText(
+    command.title,
+    1,
+    CONTRACT_LIMITS.workspaceTitle,
+    "workspace title",
+  );
   const workspace = { ...state.workspaces[index], title };
   state.workspaces = replaceAt(state.workspaces, index, workspace);
   return { workspace };
@@ -289,18 +312,38 @@ function archiveWorkspace(state, command) {
 
 /** @param {WorkspaceExportV2} state @param {CreateGroupCommand} command */
 function createGroup(state, command, createId) {
-  const id = requireId(command.id ?? (createId ? createId() : undefined), "group");
+  const id = requireId(
+    command.id ?? (createId ? createId() : undefined),
+    "group",
+  );
   assertUniqueId(state, id);
   requireId(command.workspaceId, "workspace");
-  if (!state.workspaces.some((workspace) => workspace.id === command.workspaceId)) {
-    throw new DomainError("not_found", "Workspace was not found.", { code: "workspace_not_found" });
+  if (
+    !state.workspaces.some((workspace) => workspace.id === command.workspaceId)
+  ) {
+    throw new DomainError("not_found", "Workspace was not found.", {
+      code: "workspace_not_found",
+    });
   }
   if (state.groups.length >= CONTRACT_LIMITS.groups) {
-    throw new DomainError("quota", "Group limit reached.", { code: "groups_quota" });
+    throw new DomainError("quota", "Group limit reached.", {
+      code: "groups_quota",
+    });
   }
-  const title = requireText(command.title, 1, CONTRACT_LIMITS.groupTitle, "group title");
-  const siblings = state.groups.filter((group) => group.workspaceId === command.workspaceId);
-  const { order, collection } = insertOrder(siblings, command.beforeId, command.afterId);
+  const title = requireText(
+    command.title,
+    1,
+    CONTRACT_LIMITS.groupTitle,
+    "group title",
+  );
+  const siblings = state.groups.filter(
+    (group) => group.workspaceId === command.workspaceId,
+  );
+  const { order, collection } = insertOrder(
+    siblings,
+    command.beforeId,
+    command.afterId,
+  );
   if (collection !== siblings) {
     state.groups = replaceCollection(state.groups, siblings, collection);
   }
@@ -318,7 +361,12 @@ function createGroup(state, command, createId) {
 /** @param {WorkspaceExportV2} state @param {RenameGroupCommand} command */
 function renameGroup(state, command) {
   const index = findIndex(state.groups, command.groupId, "group");
-  const title = requireText(command.title, 1, CONTRACT_LIMITS.groupTitle, "group title");
+  const title = requireText(
+    command.title,
+    1,
+    CONTRACT_LIMITS.groupTitle,
+    "group title",
+  );
   const group = { ...state.groups[index], title };
   state.groups = replaceAt(state.groups, index, group);
   return { group };
@@ -329,12 +377,18 @@ function moveItem(state, command) {
   const index = findIndex(state.items, command.itemId, "item");
   requireId(command.groupId, "group");
   if (!state.groups.some((group) => group.id === command.groupId)) {
-    throw new DomainError("not_found", "Group was not found.", { code: "group_not_found" });
+    throw new DomainError("not_found", "Group was not found.", {
+      code: "group_not_found",
+    });
   }
   const current = state.items[index];
   const without = state.items.filter((item) => item.id !== current.id);
   const siblings = without.filter((item) => item.groupId === command.groupId);
-  const { order, collection } = insertOrder(siblings, command.beforeId, command.afterId);
+  const { order, collection } = insertOrder(
+    siblings,
+    command.beforeId,
+    command.afterId,
+  );
   let nextItems = without;
   if (collection !== siblings) {
     nextItems = replaceCollection(without, siblings, collection);
@@ -355,7 +409,8 @@ function trashItem(state, trash, command, now, createId) {
   const item = state.items[index];
   state.items = state.items.filter((_, itemIndex) => itemIndex !== index);
   trash.items = [...trash.items.filter((entry) => entry.id !== item.id), item];
-  const tombstoneId = command.tombstoneId ?? (createId ? createId() : `tombstone:${item.id}`);
+  const tombstoneId =
+    command.tombstoneId ?? (createId ? createId() : `tombstone:${item.id}`);
   trash.tombstones = [
     ...trash.tombstones.filter((entry) => entry.entityId !== item.id),
     {
@@ -374,28 +429,44 @@ function trashItem(state, trash, command, now, createId) {
  * @param {RestoreItemCommand} command
  */
 function restoreItem(state, trash, command) {
-  const trashIndex = trash.items.findIndex((item) => item.id === command.itemId);
+  const trashIndex = trash.items.findIndex(
+    (item) => item.id === command.itemId,
+  );
   if (trashIndex < 0) {
-    throw new DomainError("not_found", "Trashed item was not found.", { code: "trash_not_found" });
+    throw new DomainError("not_found", "Trashed item was not found.", {
+      code: "trash_not_found",
+    });
   }
   const item = trash.items[trashIndex];
   trash.items = trash.items.filter((_, itemIndex) => itemIndex !== trashIndex);
-  trash.tombstones = trash.tombstones.filter((entry) => entry.entityId !== item.id);
+  trash.tombstones = trash.tombstones.filter(
+    (entry) => entry.entityId !== item.id,
+  );
 
   const groupId = command.groupId ?? item.groupId;
   requireId(groupId, "group");
   if (!state.groups.some((group) => group.id === groupId)) {
-    throw new DomainError("not_found", "Group was not found.", { code: "group_not_found" });
+    throw new DomainError("not_found", "Group was not found.", {
+      code: "group_not_found",
+    });
   }
   if (state.items.some((entry) => entry.id === item.id)) {
-    throw new DomainError("conflict", "Item already exists in the workspace.", { code: "item_conflict" });
+    throw new DomainError("conflict", "Item already exists in the workspace.", {
+      code: "item_conflict",
+    });
   }
   if (state.items.length >= CONTRACT_LIMITS.items) {
-    throw new DomainError("quota", "Item limit reached.", { code: "items_quota" });
+    throw new DomainError("quota", "Item limit reached.", {
+      code: "items_quota",
+    });
   }
 
   const siblings = state.items.filter((entry) => entry.groupId === groupId);
-  const { order, collection } = insertOrder(siblings, command.beforeId, command.afterId);
+  const { order, collection } = insertOrder(
+    siblings,
+    command.beforeId,
+    command.afterId,
+  );
   if (collection !== siblings) {
     state.items = replaceCollection(state.items, siblings, collection);
   }
@@ -406,25 +477,43 @@ function restoreItem(state, trash, command) {
 
 /** @param {WorkspaceExportV2} state @param {CreateItemCommand} command @param {string} now */
 function createItem(state, command, now, createId) {
-  const id = requireId(command.id ?? (createId ? createId() : undefined), "item");
+  const id = requireId(
+    command.id ?? (createId ? createId() : undefined),
+    "item",
+  );
   assertUniqueId(state, id);
   requireId(command.groupId, "group");
   if (!state.groups.some((group) => group.id === command.groupId)) {
-    throw new DomainError("not_found", "Group was not found.", { code: "group_not_found" });
+    throw new DomainError("not_found", "Group was not found.", {
+      code: "group_not_found",
+    });
   }
   if (state.items.length >= CONTRACT_LIMITS.items) {
-    throw new DomainError("quota", "Item limit reached.", { code: "items_quota" });
+    throw new DomainError("quota", "Item limit reached.", {
+      code: "items_quota",
+    });
   }
   if (!ITEM_KINDS.includes(command.kind)) {
     throw new DomainError("validation", "Item kind is invalid.");
   }
-  const title = requireText(command.title ?? "", 0, CONTRACT_LIMITS.itemTitle, "item title");
+  const title = requireText(
+    command.title ?? "",
+    0,
+    CONTRACT_LIMITS.itemTitle,
+    "item title",
+  );
   const createdAt =
     command.createdAt !== undefined
       ? requireTimestamp(command.createdAt, "item createdAt")
       : now;
-  const siblings = state.items.filter((item) => item.groupId === command.groupId);
-  const { order, collection } = insertOrder(siblings, command.beforeId, command.afterId);
+  const siblings = state.items.filter(
+    (item) => item.groupId === command.groupId,
+  );
+  const { order, collection } = insertOrder(
+    siblings,
+    command.beforeId,
+    command.afterId,
+  );
   if (collection !== siblings) {
     state.items = replaceCollection(state.items, siblings, collection);
   }
@@ -434,11 +523,26 @@ function createItem(state, command, now, createId) {
   if (command.kind === "link") {
     const url = normalizeHttpUrl(command.url);
     if (!url) {
-      throw new DomainError("validation", "Link URL is invalid.", { code: "invalid_url" });
+      throw new DomainError("validation", "Link URL is invalid.", {
+        code: "invalid_url",
+      });
     }
-    item = { id, groupId: command.groupId, kind: "link", title, url, createdAt, order };
+    item = {
+      id,
+      groupId: command.groupId,
+      kind: "link",
+      title,
+      url,
+      createdAt,
+      order,
+    };
   } else {
-    const content = requireText(command.content ?? "", 0, CONTRACT_LIMITS.content, "item content");
+    const content = requireText(
+      command.content ?? "",
+      0,
+      CONTRACT_LIMITS.content,
+      "item content",
+    );
     item =
       command.kind === "task"
         ? {
@@ -470,10 +574,14 @@ function toggleTask(state, command) {
   const index = findIndex(state.items, command.itemId, "item");
   const current = state.items[index];
   if (current.kind !== "task") {
-    throw new DomainError("validation", "Only tasks can be toggled.", { code: "not_a_task" });
+    throw new DomainError("validation", "Only tasks can be toggled.", {
+      code: "not_a_task",
+    });
   }
   const completed =
-    typeof command.completed === "boolean" ? command.completed : !current.completed;
+    typeof command.completed === "boolean"
+      ? command.completed
+      : !current.completed;
   const item = { ...current, completed };
   state.items = replaceAt(state.items, index, item);
   return { item };
@@ -493,7 +601,11 @@ function reorderEntity(state, command) {
     const index = findIndex(state.workspaces, command.entityId, "workspace");
     const current = state.workspaces[index];
     const without = state.workspaces.filter((entry) => entry.id !== current.id);
-    const { order, collection } = insertOrder(without, command.beforeId, command.afterId);
+    const { order, collection } = insertOrder(
+      without,
+      command.beforeId,
+      command.afterId,
+    );
     state.workspaces = [...collection, { ...current, order }];
     return { entityType: "workspace", entityId: current.id, order };
   }
@@ -502,10 +614,17 @@ function reorderEntity(state, command) {
     const index = findIndex(state.groups, command.entityId, "group");
     const current = state.groups[index];
     const without = state.groups.filter((entry) => entry.id !== current.id);
-    const siblings = without.filter((entry) => entry.workspaceId === current.workspaceId);
-    const { order, collection } = insertOrder(siblings, command.beforeId, command.afterId);
+    const siblings = without.filter(
+      (entry) => entry.workspaceId === current.workspaceId,
+    );
+    const { order, collection } = insertOrder(
+      siblings,
+      command.beforeId,
+      command.afterId,
+    );
     let next = without;
-    if (collection !== siblings) next = replaceCollection(without, siblings, collection);
+    if (collection !== siblings)
+      next = replaceCollection(without, siblings, collection);
     state.groups = [...next, { ...current, order }];
     return { entityType: "group", entityId: current.id, order };
   }
@@ -514,9 +633,14 @@ function reorderEntity(state, command) {
   const current = state.items[index];
   const without = state.items.filter((entry) => entry.id !== current.id);
   const siblings = without.filter((entry) => entry.groupId === current.groupId);
-  const { order, collection } = insertOrder(siblings, command.beforeId, command.afterId);
+  const { order, collection } = insertOrder(
+    siblings,
+    command.beforeId,
+    command.afterId,
+  );
   let next = without;
-  if (collection !== siblings) next = replaceCollection(without, siblings, collection);
+  if (collection !== siblings)
+    next = replaceCollection(without, siblings, collection);
   state.items = [...next, { ...current, order }];
   return { entityType: "item", entityId: current.id, order };
 }
@@ -527,17 +651,30 @@ function importExport(state, command) {
   try {
     migrated = migrateWorkspaceExport(command.payload);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Import payload is invalid.";
+    const message =
+      error instanceof Error ? error.message : "Import payload is invalid.";
     if (/Unsupported/.test(message)) {
-      throw new DomainError("unsupported", message, { code: "unsupported_schema", cause: error });
+      throw new DomainError("unsupported", message, {
+        code: "unsupported_schema",
+        cause: error,
+      });
     }
     if (/exceed the supported limit/.test(message)) {
-      throw new DomainError("quota", message, { code: "import_quota", cause: error });
+      throw new DomainError("quota", message, {
+        code: "import_quota",
+        cause: error,
+      });
     }
     if (/Duplicate|unknown|invalid|must be/i.test(message)) {
-      throw new DomainError("validation", message, { code: "import_invalid", cause: error });
+      throw new DomainError("validation", message, {
+        code: "import_invalid",
+        cause: error,
+      });
     }
-    throw new DomainError("corruption", message, { code: "import_corrupt", cause: error });
+    throw new DomainError("corruption", message, {
+      code: "import_corrupt",
+      cause: error,
+    });
   }
   state.schemaVersion = migrated.schemaVersion;
   state.workspaces = migrated.workspaces;
@@ -581,21 +718,33 @@ function insertOrder(siblings, beforeId, afterId) {
   try {
     return { order: orderBetween(before, after), collection: siblings };
   } catch (error) {
-    if (!(error instanceof Error) || !/precision is exhausted/.test(error.message)) {
+    if (
+      !(error instanceof Error) ||
+      !/precision is exhausted/.test(error.message)
+    ) {
       if (error instanceof Error && /ascending|invalid/.test(error.message)) {
         throw new DomainError("validation", error.message, { cause: error });
       }
       throw error;
     }
     const rebalanced = rebalanceOrders(siblings);
-    const beforeOrder = hasBefore ? requireSibling(rebalanced, beforeId).order : null;
-    const afterOrder = hasAfter ? requireSibling(rebalanced, afterId).order : null;
+    const beforeOrder = hasBefore
+      ? requireSibling(rebalanced, beforeId).order
+      : null;
+    const afterOrder = hasAfter
+      ? requireSibling(rebalanced, afterId).order
+      : null;
     try {
-      return { order: orderBetween(beforeOrder, afterOrder), collection: rebalanced };
+      return {
+        order: orderBetween(beforeOrder, afterOrder),
+        collection: rebalanced,
+      };
     } catch (retryError) {
       throw new DomainError(
         "corruption",
-        retryError instanceof Error ? retryError.message : "Could not assign order.",
+        retryError instanceof Error
+          ? retryError.message
+          : "Could not assign order.",
         { code: "order_exhausted", cause: retryError },
       );
     }
@@ -605,7 +754,9 @@ function insertOrder(siblings, beforeId, afterId) {
 /** @template {OrderedEntity} T @param {readonly T[]} entities */
 function sortByOrder(entities) {
   return [...entities].sort((left, right) =>
-    left.order === right.order ? left.id.localeCompare(right.id) : left.order - right.order,
+    left.order === right.order
+      ? left.id.localeCompare(right.id)
+      : left.order - right.order,
   );
 }
 
@@ -623,7 +774,11 @@ function requireSibling(sorted, id) {
 /** @param {unknown} trash @returns {TrashBundle} */
 function normalizeTrash(trash) {
   if (trash == null) return { items: [], tombstones: [] };
-  if (!isRecord(trash) || !Array.isArray(trash.items) || !Array.isArray(trash.tombstones)) {
+  if (
+    !isRecord(trash) ||
+    !Array.isArray(trash.items) ||
+    !Array.isArray(trash.tombstones)
+  ) {
     throw new DomainError("corruption", "Trash bundle is invalid.");
   }
   return {
@@ -657,7 +812,10 @@ function cloneLogEntry(entry) {
 function resolveNow(now) {
   const value = now ? now() : new Date().toISOString();
   if (!isUtcTimestamp(value)) {
-    throw new DomainError("validation", "now() must return a canonical UTC timestamp.");
+    throw new DomainError(
+      "validation",
+      "now() must return a canonical UTC timestamp.",
+    );
   }
   return value;
 }
@@ -669,7 +827,9 @@ function assertUniqueId(state, id) {
     state.groups.some((entry) => entry.id === id) ||
     state.items.some((entry) => entry.id === id)
   ) {
-    throw new DomainError("conflict", `Duplicate entity ID: ${id}`, { code: "duplicate_id" });
+    throw new DomainError("conflict", `Duplicate entity ID: ${id}`, {
+      code: "duplicate_id",
+    });
   }
 }
 
@@ -695,7 +855,11 @@ function requireId(value, name) {
 
 /** @param {unknown} value @param {number} minimum @param {number} maximum @param {string} name */
 function requireText(value, minimum, maximum, name) {
-  if (typeof value !== "string" || value.length < minimum || value.length > maximum) {
+  if (
+    typeof value !== "string" ||
+    value.length < minimum ||
+    value.length > maximum
+  ) {
     throw new DomainError("validation", `${name} is invalid.`);
   }
   return value;
@@ -712,7 +876,10 @@ function requireColor(value) {
 /** @param {unknown} value @param {string} name */
 function requireTimestamp(value, name) {
   if (!isUtcTimestamp(value)) {
-    throw new DomainError("validation", `${name} must be a canonical UTC timestamp.`);
+    throw new DomainError(
+      "validation",
+      `${name} must be a canonical UTC timestamp.`,
+    );
   }
   return value;
 }
@@ -720,7 +887,10 @@ function requireTimestamp(value, name) {
 /** @template {OrderedEntity} T @param {T[]} entities */
 function nextAppendOrder(entities) {
   if (entities.length === 0) return 0;
-  const max = entities.reduce((highest, entry) => Math.max(highest, entry.order), -Infinity);
+  const max = entities.reduce(
+    (highest, entry) => Math.max(highest, entry.order),
+    -Infinity,
+  );
   try {
     return orderBetween(max, null);
   } catch {
@@ -743,7 +913,9 @@ function replaceCollection(all, previousSiblings, nextSiblings) {
   const previousIds = new Set(previousSiblings.map((entry) => entry.id));
   const replacements = new Map(nextSiblings.map((entry) => [entry.id, entry]));
   return all.map((entry) =>
-    previousIds.has(entry.id) ? /** @type {T} */ (replacements.get(entry.id) ?? entry) : entry,
+    previousIds.has(entry.id)
+      ? /** @type {T} */ (replacements.get(entry.id) ?? entry)
+      : entry,
   );
 }
 

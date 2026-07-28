@@ -191,7 +191,9 @@ export interface WorkspaceRepository {
   save(snapshot: WorkspaceSnapshot): Promise<void>;
 }
 
-export function rebalanceOrders<T extends OrderedEntity>(entities: readonly T[]): T[];
+export function rebalanceOrders<T extends OrderedEntity>(
+  entities: readonly T[],
+): T[];
 export function applyCommand(
   context: CommandContext,
   command: WorkspaceCommand,

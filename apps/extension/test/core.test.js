@@ -1,13 +1,36 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { CaptureService, classifyTab, DEFAULT_GROUP_TITLE, DEFAULT_WORKSPACE_TITLE } from "../core.js";
+import {
+  CaptureService,
+  classifyTab,
+  DEFAULT_GROUP_TITLE,
+  DEFAULT_WORKSPACE_TITLE,
+} from "../core.js";
 import { memoryRepository } from "../packages/local-store/index.js";
 import { FakeBrowser, FakeRepository } from "./fakes.js";
 
 const tabs = [
-  { id: 1, index: 0, title: "Example", url: "https://example.com/a#section", pinned: false },
-  { id: 2, index: 1, title: "Pinned", url: "https://pinned.example/", pinned: true },
-  { id: 3, index: 2, title: "Settings", url: "chrome://settings", pinned: false },
+  {
+    id: 1,
+    index: 0,
+    title: "Example",
+    url: "https://example.com/a#section",
+    pinned: false,
+  },
+  {
+    id: 2,
+    index: 1,
+    title: "Pinned",
+    url: "https://pinned.example/",
+    pinned: true,
+  },
+  {
+    id: 3,
+    index: 2,
+    title: "Settings",
+    url: "chrome://settings",
+    pinned: false,
+  },
 ];
 
 function service(browser, repository, entities = null) {
@@ -27,7 +50,10 @@ test("classifies restricted and invalid URLs without throwing", () => {
     capturable: false,
     reason: "Browser and local pages cannot be captured.",
   });
-  assert.equal(classifyTab({ id: 4, url: "javascript:alert(1)" }).capturable, false);
+  assert.equal(
+    classifyTab({ id: 4, url: "javascript:alert(1)" }).capturable,
+    false,
+  );
   assert.equal(classifyTab({ id: 5 }).capturable, false);
 });
 
@@ -65,8 +91,16 @@ test("replayed command is idempotent and normalized duplicates are skipped", asy
   const browser = new FakeBrowser(tabs);
   const repository = new FakeRepository();
   const capture = service(browser, repository);
-  await capture.capture({ commandId: "same-command", tabIds: [1], close: false });
-  await capture.capture({ commandId: "same-command", tabIds: [1], close: false });
+  await capture.capture({
+    commandId: "same-command",
+    tabIds: [1],
+    close: false,
+  });
+  await capture.capture({
+    commandId: "same-command",
+    tabIds: [1],
+    close: false,
+  });
   const duplicate = await capture.capture({
     commandId: "different-command",
     tabIds: [1],
@@ -108,7 +142,10 @@ test("partial close failures do not claim a fully closed stage", async () => {
   assert.deepEqual(result.closedTabIds, []);
   assert.deepEqual(result.failedCloseIds, [1]);
   assert.equal(repository.items.length, 1);
-  assert.equal(browser.tabs.some((tab) => tab.id === 1), true);
+  assert.equal(
+    browser.tabs.some((tab) => tab.id === 1),
+    true,
+  );
 });
 
 test("recoverInterrupted marks closing ops closed when tabs are already gone", async () => {

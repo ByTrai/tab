@@ -79,12 +79,12 @@ npm run dev
 
 Environment variables:
 
-| Variable | Purpose | Required for local-only UI? |
-| --- | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection used by Drizzle | No |
-| `BETTER_AUTH_SECRET` | Server-side session signing secret | No |
-| `BETTER_AUTH_GITHUB_CLIENT_ID` | GitHub OAuth application ID | No |
-| `BETTER_AUTH_GITHUB_CLIENT_SECRET` | GitHub OAuth secret | No |
+| Variable                           | Purpose                               | Required for local-only UI? |
+| ---------------------------------- | ------------------------------------- | --------------------------- |
+| `DATABASE_URL`                     | PostgreSQL connection used by Drizzle | No                          |
+| `BETTER_AUTH_SECRET`               | Server-side session signing secret    | No                          |
+| `BETTER_AUTH_GITHUB_CLIENT_ID`     | GitHub OAuth application ID           | No                          |
+| `BETTER_AUTH_GITHUB_CLIENT_SECRET` | GitHub OAuth secret                   | No                          |
 
 Never commit `.env`, real credentials, exports containing browsing data, or test fixtures derived from private user data. When adding a variable, update both `.env.example` and the validation schema in `src/env.js`.
 

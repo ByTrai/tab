@@ -13,7 +13,10 @@ import {
 } from "../packages/workspace-contracts/index.js";
 
 const fixture = JSON.parse(
-  await readFile(new URL("./fixtures/web-workspace-v1.json", import.meta.url), "utf8"),
+  await readFile(
+    new URL("./fixtures/web-workspace-v1.json", import.meta.url),
+    "utf8",
+  ),
 );
 const NOW = "2026-07-28T12:00:00.000Z";
 
@@ -47,18 +50,25 @@ test("duplicate commandId is idempotent and returns the prior result", () => {
   assert.equal(first.state.items.length, 3);
   assert.equal(first.commandLog.length, 1);
 
-  const second = apply(first.state, {
-    type: "createItem",
-    commandId: "cmd-create-note",
-    id: "note-should-not-appear",
-    groupId: "group-1",
-    kind: "note",
-    title: "Ignored",
-  }, { commandLog: first.commandLog, trash: first.trash });
+  const second = apply(
+    first.state,
+    {
+      type: "createItem",
+      commandId: "cmd-create-note",
+      id: "note-should-not-appear",
+      groupId: "group-1",
+      kind: "note",
+      title: "Ignored",
+    },
+    { commandLog: first.commandLog, trash: first.trash },
+  );
 
   assert.equal(second.state.items.length, 3);
   assert.deepEqual(second.result, first.result);
-  assert.equal(second.state.items.some((item) => item.id === "note-should-not-appear"), false);
+  assert.equal(
+    second.state.items.some((item) => item.id === "note-should-not-appear"),
+    false,
+  );
   assert.equal(second.commandLog.length, 1);
 });
 
@@ -97,13 +107,16 @@ test("createItem rejects unsafe URLs", () => {
 
 test("enforces collection quotas", () => {
   const state = seededState();
-  state.workspaces = Array.from({ length: CONTRACT_LIMITS.workspaces }, (_, index) => ({
-    id: `ws-${index}`,
-    title: `Workspace ${index}`,
-    color: "#112233",
-    archived: false,
-    order: index,
-  }));
+  state.workspaces = Array.from(
+    { length: CONTRACT_LIMITS.workspaces },
+    (_, index) => ({
+      id: `ws-${index}`,
+      title: `Workspace ${index}`,
+      color: "#112233",
+      archived: false,
+      order: index,
+    }),
+  );
 
   assert.throws(
     () =>
@@ -128,7 +141,10 @@ test("trashItem soft-deletes with a tombstone and restoreItem brings it back", (
     itemId: "link-1",
     tombstoneId: "tomb-1",
   });
-  assert.equal(trashed.state.items.some((item) => item.id === "link-1"), false);
+  assert.equal(
+    trashed.state.items.some((item) => item.id === "link-1"),
+    false,
+  );
   assert.equal(trashed.trash.items[0].id, "link-1");
   assert.deepEqual(trashed.trash.tombstones[0], {
     id: "tomb-1",
@@ -137,13 +153,20 @@ test("trashItem soft-deletes with a tombstone and restoreItem brings it back", (
     deletedAt: NOW,
   });
 
-  const restored = apply(trashed.state, {
-    type: "restoreItem",
-    commandId: "cmd-restore",
-    itemId: "link-1",
-  }, { trash: trashed.trash, commandLog: trashed.commandLog });
+  const restored = apply(
+    trashed.state,
+    {
+      type: "restoreItem",
+      commandId: "cmd-restore",
+      itemId: "link-1",
+    },
+    { trash: trashed.trash, commandLog: trashed.commandLog },
+  );
 
-  assert.equal(restored.state.items.some((item) => item.id === "link-1"), true);
+  assert.equal(
+    restored.state.items.some((item) => item.id === "link-1"),
+    true,
+  );
   assert.equal(restored.trash.items.length, 0);
   assert.equal(restored.trash.tombstones.length, 0);
 });
@@ -177,7 +200,9 @@ test("reorder rebalances when fractional precision is exhausted", () => {
     afterId: "task-1",
   });
 
-  const byId = Object.fromEntries(moved.state.items.map((item) => [item.id, item]));
+  const byId = Object.fromEntries(
+    moved.state.items.map((item) => [item.id, item]),
+  );
   assert.equal(byId["link-1"].order, 0);
   assert.equal(byId["task-1"].order, 1);
   assert.ok(byId["note-mid"].order > byId["link-1"].order);
@@ -186,12 +211,15 @@ test("reorder rebalances when fractional precision is exhausted", () => {
 
 test("InMemoryWorkspaceRepository executes commands and preserves the command log cap", async () => {
   const repository = new InMemoryWorkspaceRepository({ state: seededState() });
-  const created = await repository.execute({
-    type: "renameWorkspace",
-    commandId: "cmd-rename",
-    workspaceId: "ws-1",
-    title: "Renamed",
-  }, { now: () => NOW });
+  const created = await repository.execute(
+    {
+      type: "renameWorkspace",
+      commandId: "cmd-rename",
+      workspaceId: "ws-1",
+      title: "Renamed",
+    },
+    { now: () => NOW },
+  );
   assert.equal(created.state.workspaces[0].title, "Renamed");
 
   const log = Array.from({ length: COMMAND_LOG_LIMIT }, (_, index) => ({
@@ -205,12 +233,15 @@ test("InMemoryWorkspaceRepository executes commands and preserves the command lo
     trash: created.trash,
     commandLog: log,
   });
-  const next = await repository.execute({
-    type: "archiveWorkspace",
-    commandId: "cmd-archive",
-    workspaceId: "ws-1",
-    archived: true,
-  }, { now: () => NOW });
+  const next = await repository.execute(
+    {
+      type: "archiveWorkspace",
+      commandId: "cmd-archive",
+      workspaceId: "ws-1",
+      archived: true,
+    },
+    { now: () => NOW },
+  );
   assert.equal(next.commandLog.length, COMMAND_LOG_LIMIT);
   assert.equal(next.commandLog[0].commandId, "old-1");
   assert.equal(next.commandLog.at(-1)?.commandId, "cmd-archive");

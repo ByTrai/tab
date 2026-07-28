@@ -12,7 +12,10 @@ import {
 } from "../packages/workspace-contracts/index.js";
 
 const webFixture = JSON.parse(
-  await readFile(new URL("./fixtures/web-workspace-v1.json", import.meta.url), "utf8"),
+  await readFile(
+    new URL("./fixtures/web-workspace-v1.json", import.meta.url),
+    "utf8",
+  ),
 );
 
 test("memory repository round-trips a workspace export", async () => {
@@ -45,7 +48,10 @@ test("trashItem and restoreFromTrash preserve the item snapshot", async () => {
 
   await repo.trashItem(itemId, { deletedAt: "2026-07-28T12:00:00.000Z" });
   const trashedExport = await repo.loadExport();
-  assert.equal(trashedExport.items.some((item) => item.id === itemId), false);
+  assert.equal(
+    trashedExport.items.some((item) => item.id === itemId),
+    false,
+  );
   const trash = await repo.listTrash();
   assert.equal(trash.length, 1);
   assert.equal(trash[0].entityId, itemId);
@@ -69,7 +75,10 @@ test("migrateFromLegacyWebAggregate upgrades web v1 via migrateWorkspaceExport",
 
   const loaded = await repo.loadExport();
   const expected = migrateWorkspaceExport(snapshot);
-  assert.equal(serializeWorkspaceExport(loaded), serializeWorkspaceExport(expected));
+  assert.equal(
+    serializeWorkspaceExport(loaded),
+    serializeWorkspaceExport(expected),
+  );
   const all = await repo.getAll();
   assert.equal(all.meta.migratedWeb, true);
   assert.equal(all.workspaces[0].color, "#7157d9");
@@ -93,10 +102,9 @@ test("commitCaptureOperation is idempotent by operation id", async () => {
   ];
 
   await repo.commitCaptureOperation(operation, items);
-  await repo.commitCaptureOperation(
-    { ...operation, stage: "closing" },
-    [{ ...items[0], title: "changed" }],
-  );
+  await repo.commitCaptureOperation({ ...operation, stage: "closing" }, [
+    { ...items[0], title: "changed" },
+  ]);
 
   const links = await repo.savedLinkItems();
   assert.equal(links.length, 1);

@@ -18,10 +18,18 @@ const sample = `# Roadmap
 `;
 
 test("parses assignable roadmap cards and metadata", () => {
-  assert.deepEqual(parseRoadmap(sample).map(({ id, name, owner, status }) => ({ id, name, owner, status })), [
-    { id: "T1.1", name: "Contracts", owner: "@tommy", status: "in-progress" },
-    { id: "T1.2", name: "Commands", owner: "unassigned", status: "blocked" },
-  ]);
+  assert.deepEqual(
+    parseRoadmap(sample).map(({ id, name, owner, status }) => ({
+      id,
+      name,
+      owner,
+      status,
+    })),
+    [
+      { id: "T1.1", name: "Contracts", owner: "@tommy", status: "in-progress" },
+      { id: "T1.2", name: "Commands", owner: "unassigned", status: "blocked" },
+    ],
+  );
 });
 
 test("adds a stable idempotency marker to issue bodies", () => {

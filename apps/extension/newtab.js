@@ -25,12 +25,15 @@ let searchQuery = "";
 
 async function request(message) {
   const response = await chrome.runtime.sendMessage(message);
-  if (!response?.ok) throw new Error(response?.error || "The extension did not respond.");
+  if (!response?.ok)
+    throw new Error(response?.error || "The extension did not respond.");
   return response.value;
 }
 
 function selectedTabIds() {
-  return [...tabsRoot.querySelectorAll("input:checked")].map((input) => Number(input.value));
+  return [...tabsRoot.querySelectorAll("input:checked")].map((input) =>
+    Number(input.value),
+  );
 }
 
 function selectedSavedIds() {
@@ -43,7 +46,9 @@ function syncCaptureButtons() {
   const selected = selectedTabIds().length;
   saveButton.disabled = selected === 0;
   closeButton.disabled = selected === 0;
-  status.textContent = selected ? `${selected} selected` : "Select tabs to continue";
+  status.textContent = selected
+    ? `${selected} selected`
+    : "Select tabs to continue";
 }
 
 function syncOrganizeButtons() {
@@ -100,7 +105,9 @@ function sortByOrder(list) {
 
 function renderWorkspaces() {
   workspacesRoot.replaceChildren();
-  const workspaces = sortByOrder(workspace.workspaces).filter((entry) => !entry.archived);
+  const workspaces = sortByOrder(workspace.workspaces).filter(
+    (entry) => !entry.archived,
+  );
   if (workspaces.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-tree";
@@ -125,7 +132,10 @@ function renderWorkspaces() {
     for (const group of groups) {
       const items = sortByOrder(
         workspace.items.filter(
-          (item) => item.groupId === group.id && item.kind === "link" && matchesSearch(item),
+          (item) =>
+            item.groupId === group.id &&
+            item.kind === "link" &&
+            matchesSearch(item),
         ),
       );
       if (searchQuery && items.length === 0) continue;
@@ -172,7 +182,9 @@ function renderWorkspaces() {
           title.textContent = item.title || "Unsafe link";
           const detail = document.createElement("span");
           detail.className = "unsafe";
-          detail.textContent = String(item.url || "Invalid address — not clickable");
+          detail.textContent = String(
+            item.url || "Invalid address — not clickable",
+          );
           copy.append(title, detail);
         }
         row.append(checkbox, copy);
@@ -200,7 +212,8 @@ async function renderSaved() {
   if (!items.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = "Nothing saved yet. Your first capture will appear here.";
+    empty.textContent =
+      "Nothing saved yet. Your first capture will appear here.";
     savedRoot.append(empty);
     return;
   }
@@ -267,7 +280,9 @@ async function capture(close) {
     await Promise.all([loadInventory(), renderSaved(), loadWorkspace()]);
   } catch (error) {
     status.textContent =
-      error instanceof Error ? error.message : "Capture failed. No tabs were closed.";
+      error instanceof Error
+        ? error.message
+        : "Capture failed. No tabs were closed.";
     syncCaptureButtons();
   }
 }
@@ -319,12 +334,15 @@ restoreSelectedButton.addEventListener("click", async () => {
       },
     });
     const parts = [`${result.openedIds.length} opened`];
-    if (result.skippedIds.length) parts.push(`${result.skippedIds.length} already open`);
-    if (result.failedIds.length) parts.push(`${result.failedIds.length} failed`);
+    if (result.skippedIds.length)
+      parts.push(`${result.skippedIds.length} already open`);
+    if (result.failedIds.length)
+      parts.push(`${result.failedIds.length} failed`);
     status.textContent = parts.join(" · ");
     await loadInventory();
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : "Restore failed";
+    status.textContent =
+      error instanceof Error ? error.message : "Restore failed";
   } finally {
     syncOrganizeButtons();
   }
@@ -348,7 +366,8 @@ trashSelectedButton.addEventListener("click", async () => {
     status.textContent = `${itemIds.length} link(s) moved to trash.`;
     await loadWorkspace();
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : "Could not trash selection";
+    status.textContent =
+      error instanceof Error ? error.message : "Could not trash selection";
     syncOrganizeButtons();
   }
 });
@@ -369,12 +388,15 @@ newWorkspaceButton.addEventListener("click", async () => {
     await loadWorkspace();
     status.textContent = `Workspace “${title.trim()}” created.`;
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : "Could not create workspace";
+    status.textContent =
+      error instanceof Error ? error.message : "Could not create workspace";
   }
 });
 
 newGroupButton.addEventListener("click", async () => {
-  const active = sortByOrder(workspace.workspaces).find((entry) => !entry.archived);
+  const active = sortByOrder(workspace.workspaces).find(
+    (entry) => !entry.archived,
+  );
   if (!active) {
     status.textContent = "Create a workspace before adding a group.";
     return;
@@ -394,10 +416,14 @@ newGroupButton.addEventListener("click", async () => {
     await loadWorkspace();
     status.textContent = `Group “${title.trim()}” created.`;
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : "Could not create group";
+    status.textContent =
+      error instanceof Error ? error.message : "Could not create group";
   }
 });
 
-void Promise.all([loadInventory(), renderSaved(), loadWorkspace()]).catch((error) => {
-  status.textContent = error instanceof Error ? error.message : "Tabby could not start.";
-});
+void Promise.all([loadInventory(), renderSaved(), loadWorkspace()]).catch(
+  (error) => {
+    status.textContent =
+      error instanceof Error ? error.message : "Tabby could not start.";
+  },
+);

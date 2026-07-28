@@ -1,5 +1,15 @@
 {
   "schemaVersion": 1,
-  "items": [{ "id": "capture-1", "tabId": 7, "url": "https://example.com/a", "title": "A", "capturedAt": "2026-07-27T12:00:00.000Z", "pinned": false, "index": 0 }],
+  "items": [
+    {
+      "id": "capture-1",
+      "tabId": 7,
+      "url": "https://example.com/a",
+      "title": "A",
+      "capturedAt": "2026-07-27T12:00:00.000Z",
+      "pinned": false,
+      "index": 0
+    }
+  ],
   "operations": [{ "id": "operation-1", "stage": "persisted", "items": [] }]
 }

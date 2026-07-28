@@ -30,7 +30,10 @@ export class FakeBrowser {
     const closedIds = [];
     const failedIds = [];
     for (const id of ids) {
-      if (this.failCloseIds.has(id) || !this.tabs.some((tab) => tab.id === id)) {
+      if (
+        this.failCloseIds.has(id) ||
+        !this.tabs.some((tab) => tab.id === id)
+      ) {
         failedIds.push(id);
         continue;
       }

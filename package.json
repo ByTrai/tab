@@ -24,7 +24,7 @@
     "typecheck": "tsc --noEmit",
     "check:manifest": "node scripts/check-extension-manifest.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
-    "audit:dependencies": "npm audit --omit=dev --audit-level=high",
+    "audit:dependencies": "node scripts/audit-production.mjs",
     "roadmap:issues": "node scripts/create-roadmap-issues.mjs",
     "test:roadmap-issues": "node --test scripts/create-roadmap-issues.test.mjs"
   },

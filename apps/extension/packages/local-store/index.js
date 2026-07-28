@@ -53,19 +53,31 @@ export function createEmptyEntityState() {
  * @param {string} action
  */
 export function wrapStorageError(error, action) {
-  const name = error && typeof error === "object" && "name" in error ? String(error.name) : "";
-  const message = error instanceof Error ? error.message : String(error ?? "unknown storage error");
+  const name =
+    error && typeof error === "object" && "name" in error
+      ? String(error.name)
+      : "";
+  const message =
+    error instanceof Error
+      ? error.message
+      : String(error ?? "unknown storage error");
   if (name === "QuotaExceededError" || /quota/i.test(message)) {
     return new Error(
       `Tabby's local storage is out of quota while trying to ${action}. ${RECOVERY_HINT}`,
     );
   }
-  if (name === "InvalidStateError" || name === "UnknownError" || /corrupt|Internal error|DataError/i.test(message)) {
+  if (
+    name === "InvalidStateError" ||
+    name === "UnknownError" ||
+    /corrupt|Internal error|DataError/i.test(message)
+  ) {
     return new Error(
       `Tabby's local entity database looks corrupted while trying to ${action}. ${RECOVERY_HINT}`,
     );
   }
-  return new Error(`Could not ${action} in Tabby's local entity store: ${message}. ${RECOVERY_HINT}`);
+  return new Error(
+    `Could not ${action} in Tabby's local entity store: ${message}. ${RECOVERY_HINT}`,
+  );
 }
 
 /**
@@ -148,8 +160,11 @@ export function memoryRepository(initial = {}) {
       state = commitCaptureInState(state, operation, items);
     },
     async updateOperation(operation) {
-      const index = state.operations.findIndex((entry) => entry.id === operation.id);
-      if (index === -1) throw new Error(`Capture operation not found: ${operation.id}`);
+      const index = state.operations.findIndex(
+        (entry) => entry.id === operation.id,
+      );
+      if (index === -1)
+        throw new Error(`Capture operation not found: ${operation.id}`);
       state.operations = state.operations.map((entry) =>
         entry.id === operation.id ? clone(operation) : entry,
       );
@@ -212,17 +227,24 @@ export class EntityRepository {
         await clearStore(stores.groups);
         await clearStore(stores.items);
         await clearStore(stores.trash);
-        for (const workspace of canonical.workspaces) await putRecord(stores.workspaces, workspace);
-        for (const group of canonical.groups) await putRecord(stores.groups, group);
+        for (const workspace of canonical.workspaces)
+          await putRecord(stores.workspaces, workspace);
+        for (const group of canonical.groups)
+          await putRecord(stores.groups, group);
         for (const item of canonical.items) await putRecord(stores.items, item);
-        await putMeta(stores.meta, "lastExportSchemaVersion", canonical.schemaVersion);
+        await putMeta(
+          stores.meta,
+          "lastExportSchemaVersion",
+          canonical.schemaVersion,
+        );
       },
     );
   }
 
   async getAll() {
     return this._read(async (stores) => {
-      const operationOrder = (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
+      const operationOrder =
+        (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
       return {
         workspaces: await getAllRecords(stores.workspaces),
         groups: await getAllRecords(stores.groups),
@@ -256,18 +278,26 @@ export class EntityRepository {
   }
 
   async trashItem(itemId, { deletedAt } = {}) {
-    await this._write([STORE_NAMES.items, STORE_NAMES.trash], async (stores) => {
-      const item = await getRecord(stores.items, itemId);
-      if (!item) throw new Error(`Item not found: ${itemId}`);
-      const record = createTrashRecord(item, deletedAt);
-      await putRecord(stores.trash, record);
-      await deleteRecord(stores.items, itemId);
-    });
+    await this._write(
+      [STORE_NAMES.items, STORE_NAMES.trash],
+      async (stores) => {
+        const item = await getRecord(stores.items, itemId);
+        if (!item) throw new Error(`Item not found: ${itemId}`);
+        const record = createTrashRecord(item, deletedAt);
+        await putRecord(stores.trash, record);
+        await deleteRecord(stores.items, itemId);
+      },
+    );
   }
 
   async restoreFromTrash(trashId) {
     await this._write(
-      [STORE_NAMES.items, STORE_NAMES.groups, STORE_NAMES.workspaces, STORE_NAMES.trash],
+      [
+        STORE_NAMES.items,
+        STORE_NAMES.groups,
+        STORE_NAMES.workspaces,
+        STORE_NAMES.trash,
+      ],
       async (stores) => {
         const record = await getRecord(stores.trash, trashId);
         if (!record) throw new Error(`Trash record not found: ${trashId}`);
@@ -279,7 +309,9 @@ export class EntityRepository {
   }
 
   async listTrash() {
-    return this._read(async (stores) => sortTrash(await getAllRecords(stores.trash)));
+    return this._read(async (stores) =>
+      sortTrash(await getAllRecords(stores.trash)),
+    );
   }
 
   async commitCaptureOperation(operation, items) {
@@ -295,7 +327,8 @@ export class EntityRepository {
         for (const item of items ?? []) await putRecord(stores.items, item);
         await putRecord(stores.operations, operation);
 
-        let order = (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
+        let order =
+          (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
         if (!Array.isArray(order)) order = [];
         order = [...order, operation.id];
         while (order.length > CONTRACT_LIMITS.captureOperations) {
@@ -310,7 +343,8 @@ export class EntityRepository {
   async updateOperation(operation) {
     await this._write([STORE_NAMES.operations], async (stores) => {
       const existing = await getRecord(stores.operations, operation.id);
-      if (!existing) throw new Error(`Capture operation not found: ${operation.id}`);
+      if (!existing)
+        throw new Error(`Capture operation not found: ${operation.id}`);
       await putRecord(stores.operations, operation);
     });
   }
@@ -321,7 +355,8 @@ export class EntityRepository {
 
   async listOperations() {
     return this._read(async (stores) => {
-      const order = (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
+      const order =
+        (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
       const all = await getAllRecords(stores.operations);
       return orderOperations(all, Array.isArray(order) ? order : []);
     });
@@ -340,7 +375,8 @@ export class EntityRepository {
       [STORE_NAMES.items, STORE_NAMES.operations, STORE_NAMES.meta],
       async (stores) => {
         for (const item of migrated.items) await putRecord(stores.items, item);
-        let order = (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
+        let order =
+          (await getMeta(stores.meta, META_KEYS.operationOrder)) ?? [];
         if (!Array.isArray(order)) order = [];
         for (const operation of migrated.operations) {
           const existing = await getRecord(stores.operations, operation.id);
@@ -368,11 +404,17 @@ export class EntityRepository {
         STORE_NAMES.meta,
       ],
       async (stores) => {
-        for (const workspace of canonical.workspaces) await putRecord(stores.workspaces, workspace);
-        for (const group of canonical.groups) await putRecord(stores.groups, group);
+        for (const workspace of canonical.workspaces)
+          await putRecord(stores.workspaces, workspace);
+        for (const group of canonical.groups)
+          await putRecord(stores.groups, group);
         for (const item of canonical.items) await putRecord(stores.items, item);
         await putMeta(stores.meta, META_KEYS.migratedWeb, true);
-        await putMeta(stores.meta, "lastExportSchemaVersion", canonical.schemaVersion);
+        await putMeta(
+          stores.meta,
+          "lastExportSchemaVersion",
+          canonical.schemaVersion,
+        );
       },
     );
   }
@@ -396,7 +438,12 @@ export class EntityRepository {
    * @param {(stores: Record<string, IDBObjectStore>) => Promise<void> | void} fn
    */
   async _write(storeNames, fn) {
-    await this._withTransaction(storeNames, "readwrite", fn, "persist entity data");
+    await this._withTransaction(
+      storeNames,
+      "readwrite",
+      fn,
+      "persist entity data",
+    );
   }
 
   /**
@@ -419,7 +466,8 @@ export class EntityRepository {
         const transaction = database.transaction(storeNames, mode);
         /** @type {Record<string, IDBObjectStore>} */
         const stores = {};
-        for (const name of storeNames) stores[name] = transaction.objectStore(name);
+        for (const name of storeNames)
+          stores[name] = transaction.objectStore(name);
 
         Promise.resolve()
           .then(() => fn(stores))
@@ -471,15 +519,21 @@ export class EntityRepository {
           db.createObjectStore(STORE_NAMES.workspaces, { keyPath: "id" });
         }
         if (!db.objectStoreNames.contains(STORE_NAMES.groups)) {
-          const groups = db.createObjectStore(STORE_NAMES.groups, { keyPath: "id" });
+          const groups = db.createObjectStore(STORE_NAMES.groups, {
+            keyPath: "id",
+          });
           groups.createIndex("byWorkspaceId", "workspaceId", { unique: false });
         }
         if (!db.objectStoreNames.contains(STORE_NAMES.items)) {
-          const items = db.createObjectStore(STORE_NAMES.items, { keyPath: "id" });
+          const items = db.createObjectStore(STORE_NAMES.items, {
+            keyPath: "id",
+          });
           items.createIndex("byGroupId", "groupId", { unique: false });
         }
         if (!db.objectStoreNames.contains(STORE_NAMES.trash)) {
-          const trash = db.createObjectStore(STORE_NAMES.trash, { keyPath: "id" });
+          const trash = db.createObjectStore(STORE_NAMES.trash, {
+            keyPath: "id",
+          });
           trash.createIndex("byDeletedAt", "deletedAt", { unique: false });
         }
         if (!db.objectStoreNames.contains(STORE_NAMES.operations)) {
@@ -582,8 +636,12 @@ function isRecord(value) {
  */
 function sortByOrder(list) {
   return list.slice().sort((left, right) => {
-    const leftOrder = Number.isFinite(left.order) ? /** @type {number} */ (left.order) : 0;
-    const rightOrder = Number.isFinite(right.order) ? /** @type {number} */ (right.order) : 0;
+    const leftOrder = Number.isFinite(left.order)
+      ? /** @type {number} */ (left.order)
+      : 0;
+    const rightOrder = Number.isFinite(right.order)
+      ? /** @type {number} */ (right.order)
+      : 0;
     return leftOrder - rightOrder;
   });
 }
@@ -591,7 +649,8 @@ function sortByOrder(list) {
 /** @param {import("./index.js").TrashRecord[]} trash */
 function sortTrash(trash) {
   return trash.slice().sort((left, right) => {
-    if (left.deletedAt === right.deletedAt) return left.id.localeCompare(right.id);
+    if (left.deletedAt === right.deletedAt)
+      return left.id.localeCompare(right.id);
     return left.deletedAt < right.deletedAt ? -1 : 1;
   });
 }
@@ -621,11 +680,16 @@ function restoreFromTrashInState(state, trashId) {
   if (!record) throw new Error(`Trash record not found: ${trashId}`);
   const next = cloneState(state);
   next.trash = next.trash.filter((entry) => entry.id !== trashId);
-  if (record.entityType === "item") next.items = upsertById(next.items, record.snapshot);
-  else if (record.entityType === "group") next.groups = upsertById(next.groups, record.snapshot);
+  if (record.entityType === "item")
+    next.items = upsertById(next.items, record.snapshot);
+  else if (record.entityType === "group")
+    next.groups = upsertById(next.groups, record.snapshot);
   else if (record.entityType === "workspace")
     next.workspaces = upsertById(next.workspaces, record.snapshot);
-  else throw new Error(`Unsupported trash entity type: ${String(record.entityType)}`);
+  else
+    throw new Error(
+      `Unsupported trash entity type: ${String(record.entityType)}`,
+    );
   return next;
 }
 
@@ -636,7 +700,8 @@ function restoreFromTrashInState(state, trashId) {
  */
 function createTrashRecord(item, deletedAt) {
   const when = deletedAt ?? new Date().toISOString();
-  if (typeof when !== "string") throw new Error("Trash deletedAt must be a string timestamp.");
+  if (typeof when !== "string")
+    throw new Error("Trash deletedAt must be a string timestamp.");
   return {
     id: `trash:${item.id}:${when}`,
     entityId: item.id,
@@ -661,7 +726,10 @@ function commitCaptureInState(state, operation, items) {
   const next = cloneState(state);
   for (const item of items ?? []) next.items = upsertById(next.items, item);
   next.operations = [...next.operations, clone(operation)];
-  next.meta.operationOrder = [...(next.meta.operationOrder ?? []), operation.id];
+  next.meta.operationOrder = [
+    ...(next.meta.operationOrder ?? []),
+    operation.id,
+  ];
   while (next.meta.operationOrder.length > CONTRACT_LIMITS.captureOperations) {
     const oldest = next.meta.operationOrder.shift();
     if (oldest) {
@@ -705,11 +773,15 @@ function migrateCaptureIntoState(state, input) {
   for (const operation of migrated.operations) {
     if (next.operations.some((entry) => entry.id === operation.id)) continue;
     next.operations = [...next.operations, clone(operation)];
-    next.meta.operationOrder = [...(next.meta.operationOrder ?? []), operation.id];
+    next.meta.operationOrder = [
+      ...(next.meta.operationOrder ?? []),
+      operation.id,
+    ];
   }
   while (next.meta.operationOrder.length > CONTRACT_LIMITS.captureOperations) {
     const oldest = next.meta.operationOrder.shift();
-    if (oldest) next.operations = next.operations.filter((entry) => entry.id !== oldest);
+    if (oldest)
+      next.operations = next.operations.filter((entry) => entry.id !== oldest);
   }
   next.meta.migratedCapture = true;
   return next;
@@ -724,7 +796,8 @@ function migrateWebIntoState(state, input) {
   const next = cloneState(state);
   for (const workspace of canonical.workspaces)
     next.workspaces = upsertById(next.workspaces, workspace);
-  for (const group of canonical.groups) next.groups = upsertById(next.groups, group);
+  for (const group of canonical.groups)
+    next.groups = upsertById(next.groups, group);
   for (const item of canonical.items) next.items = upsertById(next.items, item);
   next.meta.migratedWeb = true;
   next.meta.lastExportSchemaVersion = canonical.schemaVersion;
@@ -814,6 +887,7 @@ async function readMetaObject(store) {
 function requestToPromise(request) {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("IndexedDB request failed."));
+    request.onerror = () =>
+      reject(request.error ?? new Error("IndexedDB request failed."));
   });
 }

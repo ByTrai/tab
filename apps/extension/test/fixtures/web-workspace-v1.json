@@ -1,9 +1,32 @@
 {
   "schemaVersion": 1,
-  "workspaces": [{ "id": "ws-1", "title": "Research", "color": "#7157D9", "archived": false }],
-  "groups": [{ "id": "group-1", "workspaceId": "ws-1", "title": "Inbox", "collapsed": false }],
+  "workspaces": [
+    { "id": "ws-1", "title": "Research", "color": "#7157D9", "archived": false }
+  ],
+  "groups": [
+    {
+      "id": "group-1",
+      "workspaceId": "ws-1",
+      "title": "Inbox",
+      "collapsed": false
+    }
+  ],
   "items": [
-    { "id": "link-1", "groupId": "group-1", "kind": "link", "title": "Example", "url": "https://Example.com/read#intro", "createdAt": "2026-07-27T12:00:00.000Z" },
-    { "id": "task-1", "groupId": "group-1", "kind": "task", "title": "Review", "completed": false, "createdAt": "2026-07-27T12:01:00.000Z" }
+    {
+      "id": "link-1",
+      "groupId": "group-1",
+      "kind": "link",
+      "title": "Example",
+      "url": "https://Example.com/read#intro",
+      "createdAt": "2026-07-27T12:00:00.000Z"
+    },
+    {
+      "id": "task-1",
+      "groupId": "group-1",
+      "kind": "task",
+      "title": "Review",
+      "completed": false,
+      "createdAt": "2026-07-27T12:01:00.000Z"
+    }
   ]
 }

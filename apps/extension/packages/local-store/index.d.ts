@@ -26,7 +26,12 @@ export interface TrashRecord {
   entityId: string;
   entityType: TrashEntityType;
   deletedAt: string;
-  snapshot: CanonicalWorkspace | CanonicalGroup | CanonicalItem | CaptureItemV2 | Record<string, unknown>;
+  snapshot:
+    | CanonicalWorkspace
+    | CanonicalGroup
+    | CanonicalItem
+    | CaptureItemV2
+    | Record<string, unknown>;
 }
 
 export interface EntityMeta {
@@ -52,7 +57,9 @@ export interface EntityRepositoryLike {
   getAll(): Promise<EntityState>;
   putWorkspace(workspace: CanonicalWorkspace): Promise<void>;
   putGroup(group: CanonicalGroup): Promise<void>;
-  putItem(item: CanonicalItem | CaptureItemV2 | Record<string, unknown>): Promise<void>;
+  putItem(
+    item: CanonicalItem | CaptureItemV2 | Record<string, unknown>,
+  ): Promise<void>;
   trashItem(itemId: string, options?: { deletedAt?: string }): Promise<void>;
   restoreFromTrash(trashId: string): Promise<void>;
   listTrash(): Promise<TrashRecord[]>;
@@ -63,15 +70,22 @@ export interface EntityRepositoryLike {
   updateOperation(operation: CaptureOperationV2): Promise<void>;
   getOperation(id: string): Promise<CaptureOperationV2 | undefined>;
   listOperations(): Promise<CaptureOperationV2[]>;
-  savedLinkItems(): Promise<Array<CaptureItemV2 | CanonicalItem | Record<string, unknown>>>;
+  savedLinkItems(): Promise<
+    Array<CaptureItemV2 | CanonicalItem | Record<string, unknown>>
+  >;
   migrateFromLegacyCaptureState(input: unknown): Promise<void>;
   migrateFromLegacyWebAggregate(input: unknown): Promise<void>;
 }
 
 export function createEmptyEntityState(): EntityState;
 export function wrapStorageError(error: unknown, action: string): Error;
-export function applyExportToMemory(state: EntityState, exportInput: unknown): EntityState;
-export function memoryRepository(initial?: Partial<EntityState>): EntityRepositoryLike;
+export function applyExportToMemory(
+  state: EntityState,
+  exportInput: unknown,
+): EntityState;
+export function memoryRepository(
+  initial?: Partial<EntityState>,
+): EntityRepositoryLike;
 
 export class EntityRepository implements EntityRepositoryLike {
   constructor(options?: { indexedDB?: IDBFactory });
@@ -80,7 +94,9 @@ export class EntityRepository implements EntityRepositoryLike {
   getAll(): Promise<EntityState>;
   putWorkspace(workspace: CanonicalWorkspace): Promise<void>;
   putGroup(group: CanonicalGroup): Promise<void>;
-  putItem(item: CanonicalItem | CaptureItemV2 | Record<string, unknown>): Promise<void>;
+  putItem(
+    item: CanonicalItem | CaptureItemV2 | Record<string, unknown>,
+  ): Promise<void>;
   trashItem(itemId: string, options?: { deletedAt?: string }): Promise<void>;
   restoreFromTrash(trashId: string): Promise<void>;
   listTrash(): Promise<TrashRecord[]>;
@@ -91,7 +107,9 @@ export class EntityRepository implements EntityRepositoryLike {
   updateOperation(operation: CaptureOperationV2): Promise<void>;
   getOperation(id: string): Promise<CaptureOperationV2 | undefined>;
   listOperations(): Promise<CaptureOperationV2[]>;
-  savedLinkItems(): Promise<Array<CaptureItemV2 | CanonicalItem | Record<string, unknown>>>;
+  savedLinkItems(): Promise<
+    Array<CaptureItemV2 | CanonicalItem | Record<string, unknown>>
+  >;
   migrateFromLegacyCaptureState(input: CaptureStateV2 | unknown): Promise<void>;
   migrateFromLegacyWebAggregate(input: unknown): Promise<void>;
 }

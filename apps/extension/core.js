@@ -285,11 +285,7 @@ export class CaptureService {
    * Opens saved link items by id. Reports partial failures and never claims
    * full success when any requested open failed.
    */
-  async restoreItems({
-    commandId,
-    itemIds,
-    duplicatePolicy = "skip",
-  }) {
+  async restoreItems({ commandId, itemIds, duplicatePolicy = "skip" }) {
     if (!commandId || !Array.isArray(itemIds) || itemIds.length === 0) {
       throw new Error("Select at least one saved link to restore.");
     }
@@ -297,9 +293,7 @@ export class CaptureService {
     const byId = await this.collectLinkItemsById();
     const openTabs = await this.browser.currentWindowTabs();
     const openKeys = new Set(
-      openTabs
-        .map((tab) => normalizedUrlKey(tab.url))
-        .filter(Boolean),
+      openTabs.map((tab) => normalizedUrlKey(tab.url)).filter(Boolean),
     );
 
     const openedIds = [];
@@ -410,11 +404,22 @@ export class CaptureService {
       command,
     );
 
-    if (command.type === "createWorkspace" || command.type === "renameWorkspace" || command.type === "archiveWorkspace") {
+    if (
+      command.type === "createWorkspace" ||
+      command.type === "renameWorkspace" ||
+      command.type === "archiveWorkspace"
+    ) {
       await this.entities.putWorkspace(applied.result.workspace);
-    } else if (command.type === "createGroup" || command.type === "renameGroup") {
+    } else if (
+      command.type === "createGroup" ||
+      command.type === "renameGroup"
+    ) {
       await this.entities.putGroup(applied.result.group);
-    } else if (command.type === "createItem" || command.type === "toggleTask" || command.type === "moveItem") {
+    } else if (
+      command.type === "createItem" ||
+      command.type === "toggleTask" ||
+      command.type === "moveItem"
+    ) {
       await this.entities.putItem(applied.result.item);
     } else if (command.type === "importExport") {
       await this.entities.replaceFromExport(applied.state);

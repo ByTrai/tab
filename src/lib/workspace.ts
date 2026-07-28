@@ -109,11 +109,13 @@ export function searchItems(
 ) {
   const needle = query.trim().toLocaleLowerCase();
   if (!needle) return data.items;
+  const groupsById = new Map(data.groups.map((group) => [group.id, group]));
+  const workspacesById = new Map(
+    data.workspaces.map((workspace) => [workspace.id, workspace]),
+  );
   return data.items.filter((item) => {
-    const group = data.groups.find(({ id }) => id === item.groupId);
-    const workspace = data.workspaces.find(
-      ({ id }) => id === group?.workspaceId,
-    );
+    const group = groupsById.get(item.groupId);
+    const workspace = group ? workspacesById.get(group.workspaceId) : undefined;
     return [
       item.title,
       "url" in item ? item.url : undefined,
