@@ -266,3 +266,11 @@ function timestamp(value, name) {
   if (!isUtcTimestamp(value)) throw new Error(`${name} must be a canonical UTC timestamp.`);
   return value;
 }
+
+export {
+  COMMAND_LOG_LIMIT,
+  DomainError,
+  InMemoryWorkspaceRepository,
+  applyCommand,
+  rebalanceOrders,
+} from "./commands.js";

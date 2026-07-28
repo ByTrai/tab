@@ -97,3 +97,34 @@ export function isClientId(value: unknown): value is string;
 export function orderBetween(before: number | null, after: number | null): number;
 export function migrateWorkspaceExport(input: unknown): WorkspaceExportV2;
 export function serializeWorkspaceExport(value: WorkspaceExportV2): string;
+
+export {
+  COMMAND_LOG_LIMIT,
+  DomainError,
+  InMemoryWorkspaceRepository,
+  applyCommand,
+  rebalanceOrders,
+} from "./commands.js";
+export type {
+  ApplyCommandResult,
+  ArchiveWorkspaceCommand,
+  CommandContext,
+  CommandLogEntry,
+  CreateGroupCommand,
+  CreateItemCommand,
+  CreateWorkspaceCommand,
+  DomainErrorCategory,
+  ExportSnapshotCommand,
+  ImportExportCommand,
+  MoveItemCommand,
+  RenameGroupCommand,
+  RenameWorkspaceCommand,
+  ReorderEntityCommand,
+  RestoreItemCommand,
+  ToggleTaskCommand,
+  TrashBundle,
+  TrashItemCommand,
+  WorkspaceCommand,
+  WorkspaceRepository,
+  WorkspaceSnapshot,
+} from "./commands.js";
