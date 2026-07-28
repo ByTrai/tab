@@ -8,20 +8,25 @@
   ],
   "scripts": {
     "build": "next build",
-    "check": "next lint && tsc --noEmit",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:extension && npm run test:roadmap-issues && npm run check:manifest && npm run check:licenses",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "dev": "next dev --turbo",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,md,mdx,json,yml,yaml}\" --cache",
+    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mjs,md,mdx,json,yml,yaml}\" --cache",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix --max-warnings=0",
     "preview": "next build && next start",
     "start": "next start",
     "test:extension": "node --test apps/extension/test/*.test.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:manifest": "node scripts/check-extension-manifest.mjs",
+    "check:licenses": "node scripts/check-licenses.mjs",
+    "audit:dependencies": "npm audit --omit=dev --audit-level=high",
+    "roadmap:issues": "node scripts/create-roadmap-issues.mjs",
+    "test:roadmap-issues": "node --test scripts/create-roadmap-issues.test.mjs"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.2",
@@ -30,7 +35,7 @@
     "@trpc/client": "^11.0.0",
     "@trpc/react-query": "^11.0.0",
     "@trpc/server": "^11.0.0",
-    "better-auth": "^1.3",
+    "better-auth": "1.3.0",
     "drizzle-orm": "^0.41.0",
     "next": "^15.2.3",
     "postgres": "^3.4.4",
@@ -60,5 +65,9 @@
   "ct3aMetadata": {
     "initVersion": "7.40.0"
   },
-  "packageManager": "npm@10.9.3"
+  "packageManager": "npm@10.9.3",
+  "engines": {
+    "node": ">=20 <23",
+    "npm": ">=10 <11"
+  }
 }

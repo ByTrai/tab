@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 2,
+  "items": [{ "id": "capture-2", "kind": "link", "tabId": 8, "url": "https://example.com/b", "title": "B", "createdAt": "2026-07-27T12:01:00.000Z", "pinned": true, "index": 1 }],
+  "operations": [{ "id": "operation-2", "stage": "complete", "items": [] }]
+}
