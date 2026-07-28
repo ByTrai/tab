@@ -144,7 +144,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T2.1 — Indexed entity repository
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `in-progress` (`@tabby/local-store` shipped; web IDB cutover remaining)
 **Touch set:** local-store package/repositories, migration fixtures
 **Depends on:** T1.1, T1.2
 
@@ -190,7 +190,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T3.2 — Restore and duplicate policy
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done` (popup-blocked matrix / loaded-extension E2E still follow-up)
 **Touch set:** browser/domain orchestration and focused tests
 **Depends on:** T2.1, T3.1
 
@@ -221,7 +221,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T4.2 — Extension organization workspace
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done` (keyboard polish / a11y audit still follow-up)
 **Touch set:** extension new-tab UI and UI tests
 **Depends on:** T2.1, T4.1, T5.1
 
@@ -281,7 +281,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T6.1 — Adopt common commands and storage
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done` (commands + trash/export v2 on web; entity-store cutover still with T2.1)
 **Touch set:** `src/app/_components/**`, `src/lib/**`, web adapter tests
 **Depends on:** T1.2, T2.1, T5.1
 
