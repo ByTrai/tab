@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Tabby — Local Tab Workspace",
-  "version": "0.2.0",
-  "description": "Safely save and close tabs into a private, local workspace.",
+  "version": "0.3.0",
+  "description": "Safely save, organize, and restore tabs in a private, local workspace.",
   "permissions": ["tabs"],
   "background": {
     "service_worker": "background.js",

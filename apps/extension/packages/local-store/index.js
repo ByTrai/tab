@@ -11,7 +11,7 @@ import {
   WORKSPACE_EXPORT_SCHEMA_VERSION,
   migrateCaptureState,
   migrateWorkspaceExport,
-} from "@tabby/workspace-contracts";
+} from "../workspace-contracts/index.js";
 
 export const ENTITY_DB_NAME = "tabby-entities";
 export const ENTITY_DB_VERSION = 1;

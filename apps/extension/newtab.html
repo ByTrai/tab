@@ -8,33 +8,89 @@
   </head>
   <body>
     <header>
-      <div class="brand"><span>t</span><strong>tabby</strong></div>
-      <div class="privacy">● Stored on this device</div>
+      <div class="brand" aria-label="Tabby">
+        <span aria-hidden="true">t</span>
+        <strong>tabby</strong>
+      </div>
+      <div class="privacy">Stored on this device</div>
     </header>
-    <main>
-      <section class="hero">
-        <p class="eyebrow">CURRENT WINDOW</p>
-        <h1>Make room to focus.</h1>
-        <p>Select tabs to keep safely, then close only the ones you choose.</p>
-      </section>
-      <section class="panel" aria-labelledby="tabs-title">
-        <div class="panel-head">
-          <div><h2 id="tabs-title">Open tabs</h2><span id="count">Loading…</span></div>
-          <label><input type="checkbox" id="select-all" /> Select capturable</label>
+
+    <div class="layout">
+      <aside class="organize" aria-labelledby="organize-title">
+        <div class="organize-head">
+          <h2 id="organize-title">Organize</h2>
+          <p>Workspaces stay on this device.</p>
         </div>
-        <div id="tabs" aria-live="polite"></div>
-        <div class="actions">
-          <span id="status" role="status">Reading this window…</span>
-          <button id="save" class="secondary" disabled>Save</button>
-          <button id="save-close" disabled>Save &amp; close</button>
+
+        <label class="search-field" for="search">
+          <span class="sr-only">Search saved links</span>
+          <input
+            id="search"
+            type="search"
+            placeholder="Search titles or URLs"
+            autocomplete="off"
+          />
+        </label>
+
+        <div class="organize-toolbar">
+          <button type="button" id="new-workspace" class="ghost">New workspace</button>
+          <button type="button" id="new-group" class="ghost">New group</button>
         </div>
-      </section>
-      <section class="saved panel" aria-labelledby="saved-title">
-        <div class="panel-head"><div><h2 id="saved-title">Saved recently</h2><span>Your local capture history</span></div></div>
-        <div id="saved"></div>
-      </section>
-    </main>
-    <div id="toast" class="toast" hidden><span id="toast-copy"></span><button id="undo">Undo</button></div>
+
+        <div id="workspaces" class="workspace-tree" aria-live="polite"></div>
+
+        <div class="organize-actions">
+          <button type="button" id="restore-selected" class="secondary" disabled>
+            Restore selected
+          </button>
+          <button type="button" id="trash-selected" class="ghost danger" disabled>
+            Move to trash
+          </button>
+        </div>
+      </aside>
+
+      <main>
+        <section class="hero">
+          <p class="eyebrow">Current window</p>
+          <h1>Make room to focus.</h1>
+          <p>Select tabs to keep safely, then close only the ones you choose.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="tabs-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="tabs-title">Open tabs</h2>
+              <span id="count">Loading…</span>
+            </div>
+            <label class="select-all">
+              <input type="checkbox" id="select-all" />
+              Select capturable
+            </label>
+          </div>
+          <div id="tabs" aria-live="polite"></div>
+          <div class="actions">
+            <span id="status" role="status">Reading this window…</span>
+            <button type="button" id="save" class="secondary" disabled>Save</button>
+            <button type="button" id="save-close" disabled>Save &amp; close</button>
+          </div>
+        </section>
+
+        <section class="saved panel" aria-labelledby="saved-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="saved-title">Saved recently</h2>
+              <span>Your local capture history</span>
+            </div>
+          </div>
+          <div id="saved"></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" hidden>
+      <span id="toast-copy"></span>
+      <button type="button" id="undo">Undo</button>
+    </div>
     <script type="module" src="newtab.js"></script>
   </body>
 </html>
