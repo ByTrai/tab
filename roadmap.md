@@ -77,8 +77,8 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 
 ### T0.1 — Decide identity and legal foundation
 
-**Owner:** `unassigned`
-**Status:** `in-progress`
+**Owner:** `@tommy`
+**Status:** `blocked`
 **Touch set:** root legal/community files, `docs/product-review/**`
 **Depends on:** none
 
@@ -110,8 +110,8 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 
 ### T1.1 — Canonical local workspace model
 
-**Owner:** `unassigned`
-**Status:** `ready`
+**Owner:** `@tommy`
+**Status:** `in-progress`
 **Touch set:** shared contracts/domain package, contract tests, ADR
 **Depends on:** T0.1 terminology
 
@@ -119,6 +119,8 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 - Choose client-generated IDs and fractional ordering; specify maximum sizes and UTC timestamp semantics.
 - Move web-only validation/search rules behind dependency-free contracts without introducing React, Next.js, IndexedDB, SQL, or `chrome.*` dependencies.
 - Preserve web schema v1 and extension journal v1/v2 fixtures; unknown future versions fail closed and report recovery guidance.
+
+**Validation note:** dependency-free contract and migration tests pass; completion remains gated on the registry-backed T9.1 install/typecheck/build checks.
 
 **Done when:** both clients consume one vocabulary; import/export round trips are deterministic; migration and malicious-input fixtures pass.
 
@@ -397,8 +399,8 @@ The landing page is a release feature, not an afterthought. It should communicat
 
 ### T9.1 — Repair and enforce the quality baseline
 
-**Owner:** `unassigned`
-**Status:** `ready`
+**Owner:** `@tommy`
+**Status:** `done`
 **Touch set:** package scripts, ESLint/config, CI workflows
 **Depends on:** none
 
@@ -478,25 +480,14 @@ A card is complete only when:
 - `changelog/<feature>.md` contains summary, validation, next recommendations, and a ready-to-use next prompt; and
 - the issue/card shows its owner, final status, pull request, and any deliberately deferred debt.
 
-## 16. Immediate assignment proposal
-
-For the next two parallel tasks:
+## 16. Current assignment
 
 ```md
-T0.1 — Identity and open-source governance
+T1.1 — Canonical local workspace model
 Owner: @tommy
 Status: in-progress
-Touch set: LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md,
-           issue/PR templates, docs/product-review/**
-Do not touch: package.json, extension code, shared contracts, landing implementation
+Touch set: shared contracts/domain package, contract tests, ADR
+Blocked completion check: registry-backed install, typecheck, and production build
 ```
 
-```md
-T9.1 — Repair and enforce the quality baseline
-Owner: @romeo
-Status: in-progress
-Touch set: package.json scripts, eslint.config.js, CI workflows, tool-version files
-Do not touch: feature UI, persisted schemas, manifest permissions, product copy
-```
-
-These assignments are suggestions; swap the names if expertise differs. Their touch sets do not overlap, and both unblock nearly every later topic.
+T9.1 was completed by `@tommy`. Claim the next ready card only after T1.1 is completed or explicitly parked, following the one-active-card rule.

@@ -32,8 +32,8 @@ The web and extension share dependency-free workspace contracts and URL safety r
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 20 or newer.
-- npm 10 (the repository currently declares npm 10.9.3).
+- [Node.js](https://nodejs.org/) 20 or 22 (the repository uses Node 20 in `.nvmrc`).
+- npm 10.9.3, as declared by the package manager policy.
 - Chrome, Chromium, Brave, or Edge for extension development.
 - Docker or Podman only if working on the PostgreSQL-backed server/auth code.
 
@@ -155,10 +155,9 @@ Read the ADRs in `docs/adr` before changing these boundaries. The staged Plasmo 
 ### Quality checks
 
 ```bash
-npm run format:check
-npm run typecheck
-npm run test:extension
-npm run build
+npm run check            # format, lint, types, extension, manifest, and licenses
+npm run audit:dependencies
+SKIP_ENV_VALIDATION=1 npm run build
 ```
 
 Useful focused commands:
@@ -169,7 +168,7 @@ node --test apps/extension/test/contracts.test.js
 npm run format:write
 ```
 
-`npm run lint`/`npm run check` currently rely on the removed `next lint` command and are tracked as roadmap debt. Do not report those scripts as passing until they are replaced with direct ESLint invocation.
+CI runs the same checks on pull requests and `main`, then performs a production dependency audit, a production build, and a Gitleaks history scan. The manifest policy check intentionally fails if broad host access, content scripts, or permissions beyond `tabs` appear; review and update that policy only alongside the required permission and threat-model review.
 
 ## Testing expectations
 
@@ -197,3 +196,15 @@ Useful project documents:
 - [`docs/plans/plasmo-and-phase-2.md`](docs/plans/plasmo-and-phase-2.md) — staged extension migration plan.
 - [`docs/threat-model/local-alpha.md`](docs/threat-model/local-alpha.md) — current local security model.
 - [`docs/product-review/local-web-alpha.md`](docs/product-review/local-web-alpha.md) — product assumptions and review boundary.
+
+### Create GitHub issues from the roadmap
+
+The roadmap issue script is dry-run by default. It selects every card not marked `done`, preserves the card's scope and dependency text, and embeds a stable marker so repeated applied runs skip issues that already exist.
+
+```bash
+npm run roadmap:issues
+npm run roadmap:issues -- --card T1.1
+npm run roadmap:issues -- --apply --repo owner/repository
+```
+
+Roadmap owner names are not assumed to be GitHub usernames. Map them explicitly when applying issues; for example, `npm run roadmap:issues -- --apply --assign tommy=actual-login`. Use `--include-done` only when historical completed cards should also become issues. The applied mode requires an authenticated [GitHub CLI](https://cli.github.com/) installation with permission to create issues.
