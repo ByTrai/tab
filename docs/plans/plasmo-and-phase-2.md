@@ -44,14 +44,14 @@ Move Tabby to a scalable extension toolchain without weakening its local-first a
 
 ## Workstreams and ownership boundaries
 
-| Workstream | Owns | Must not own |
-| --- | --- | --- |
-| Domain/contracts | invariants, commands, schemas, migrations | React, Plasmo, `chrome.*`, SQL |
-| Local store | transactions, indexes, operation journal, recovery | UI state and browser mutation |
-| Browser adapter | tabs/sessions/context-menu capability mapping | product rules and persistence |
-| Extension shell | entry points, routing, surface composition | duplicated domain/storage logic |
-| UI system | accessible components and tokens | direct repository or browser calls |
-| Hosted web | account/settings/shared views later | local workflow dependency on network |
+| Workstream       | Owns                                               | Must not own                         |
+| ---------------- | -------------------------------------------------- | ------------------------------------ |
+| Domain/contracts | invariants, commands, schemas, migrations          | React, Plasmo, `chrome.*`, SQL       |
+| Local store      | transactions, indexes, operation journal, recovery | UI state and browser mutation        |
+| Browser adapter  | tabs/sessions/context-menu capability mapping      | product rules and persistence        |
+| Extension shell  | entry points, routing, surface composition         | duplicated domain/storage logic      |
+| UI system        | accessible components and tokens                   | direct repository or browser calls   |
+| Hosted web       | account/settings/shared views later                | local workflow dependency on network |
 
 ## Quality and security gates
 

@@ -141,14 +141,23 @@ export const ID_MAX_LENGTH = 128;
 
 /** @param {unknown} value */
 export function isUtcTimestamp(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return false;
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)
+  )
+    return false;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) && new Date(parsed).toISOString() === value;
 }
 
 /** @param {unknown} value */
 export function isClientId(value) {
-  return typeof value === "string" && value.length > 0 && value.length <= ID_MAX_LENGTH && /^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(value);
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= ID_MAX_LENGTH &&
+    /^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(value)
+  );
 }
 
 /**
@@ -158,11 +167,22 @@ export function isClientId(value) {
  * @param {number | null} after
  */
 export function orderBetween(before, after) {
-  if (before !== null && !Number.isFinite(before)) throw new Error("The previous order is invalid.");
-  if (after !== null && !Number.isFinite(after)) throw new Error("The next order is invalid.");
-  if (before !== null && after !== null && before >= after) throw new Error("Order bounds must be ascending.");
-  const value = before === null ? (after === null ? 0 : after - 1) : after === null ? before + 1 : before + (after - before) / 2;
-  if (!Number.isFinite(value) || value === before || value === after) throw new Error("Order precision is exhausted; rebalance the collection.");
+  if (before !== null && !Number.isFinite(before))
+    throw new Error("The previous order is invalid.");
+  if (after !== null && !Number.isFinite(after))
+    throw new Error("The next order is invalid.");
+  if (before !== null && after !== null && before >= after)
+    throw new Error("Order bounds must be ascending.");
+  const value =
+    before === null
+      ? after === null
+        ? 0
+        : after - 1
+      : after === null
+        ? before + 1
+        : before + (after - before) / 2;
+  if (!Number.isFinite(value) || value === before || value === after)
+    throw new Error("Order precision is exhausted; rebalance the collection.");
   return value;
 }
 
@@ -175,10 +195,19 @@ export function orderBetween(before, after) {
  */
 export function migrateWorkspaceExport(input) {
   if (!isRecord(input)) throw new Error("Workspace export must be an object.");
-  if (input.schemaVersion !== 1 && input.schemaVersion !== WORKSPACE_EXPORT_SCHEMA_VERSION) {
-    throw new Error(`Unsupported workspace schema version: ${String(input.schemaVersion)}`);
+  if (
+    input.schemaVersion !== 1 &&
+    input.schemaVersion !== WORKSPACE_EXPORT_SCHEMA_VERSION
+  ) {
+    throw new Error(
+      `Unsupported workspace schema version: ${String(input.schemaVersion)}`,
+    );
   }
-  const workspaces = boundedArray(input.workspaces, CONTRACT_LIMITS.workspaces, "workspaces");
+  const workspaces = boundedArray(
+    input.workspaces,
+    CONTRACT_LIMITS.workspaces,
+    "workspaces",
+  );
   const groups = boundedArray(input.groups, CONTRACT_LIMITS.groups, "groups");
   const items = boundedArray(input.items, CONTRACT_LIMITS.items, "items");
   const workspaceIds = new Set();
@@ -190,7 +219,12 @@ export function migrateWorkspaceExport(input) {
     workspaceIds.add(value.id);
     return {
       id: value.id,
-      title: text(value.title, 1, CONTRACT_LIMITS.workspaceTitle, "workspace title"),
+      title: text(
+        value.title,
+        1,
+        CONTRACT_LIMITS.workspaceTitle,
+        "workspace title",
+      ),
       color: color(value.color),
       archived: boolean(value.archived, "workspace archived"),
       order: order(value.order, index),
@@ -198,7 +232,8 @@ export function migrateWorkspaceExport(input) {
   });
   const canonicalGroups = groups.map((entry, index) => {
     const value = entity(entry, "group", allIds);
-    if (!isClientId(value.workspaceId) || !workspaceIds.has(value.workspaceId)) throw new Error("Group references an unknown workspace.");
+    if (!isClientId(value.workspaceId) || !workspaceIds.has(value.workspaceId))
+      throw new Error("Group references an unknown workspace.");
     groupIds.add(value.id);
     return {
       id: value.id,
@@ -210,22 +245,46 @@ export function migrateWorkspaceExport(input) {
   });
   const canonicalItems = items.map((entry, index) => {
     const value = entity(entry, "item", allIds);
-    if (!isClientId(value.groupId) || !groupIds.has(value.groupId)) throw new Error("Item references an unknown group.");
-    if (!ITEM_KINDS.includes(value.kind)) throw new Error("Item kind is invalid.");
+    if (!isClientId(value.groupId) || !groupIds.has(value.groupId))
+      throw new Error("Item references an unknown group.");
+    if (!ITEM_KINDS.includes(value.kind))
+      throw new Error("Item kind is invalid.");
     const title = text(value.title, 0, CONTRACT_LIMITS.itemTitle, "item title");
     const createdAt = timestamp(value.createdAt, "item createdAt");
-    const base = { id: value.id, groupId: value.groupId, kind: value.kind, title, createdAt, order: order(value.order, index) };
+    const base = {
+      id: value.id,
+      groupId: value.groupId,
+      kind: value.kind,
+      title,
+      createdAt,
+      order: order(value.order, index),
+    };
     if (value.kind === "link") {
       const url = normalizeHttpUrl(value.url);
       if (!url) throw new Error("Link URL is invalid.");
       return { ...base, kind: "link", url };
     }
-    const content = text(value.content ?? "", 0, CONTRACT_LIMITS.content, "item content");
+    const content = text(
+      value.content ?? "",
+      0,
+      CONTRACT_LIMITS.content,
+      "item content",
+    );
     return value.kind === "task"
-      ? { ...base, kind: "task", content, completed: boolean(value.completed ?? false, "task completed") }
+      ? {
+          ...base,
+          kind: "task",
+          content,
+          completed: boolean(value.completed ?? false, "task completed"),
+        }
       : { ...base, kind: "note", content };
   });
-  return { schemaVersion: WORKSPACE_EXPORT_SCHEMA_VERSION, workspaces: canonicalWorkspaces, groups: canonicalGroups, items: canonicalItems };
+  return {
+    schemaVersion: WORKSPACE_EXPORT_SCHEMA_VERSION,
+    workspaces: canonicalWorkspaces,
+    groups: canonicalGroups,
+    items: canonicalItems,
+  };
 }
 
 /** @param {import("./index.js").WorkspaceExportV2} value */
@@ -235,18 +294,26 @@ export function serializeWorkspaceExport(value) {
 }
 
 function boundedArray(value, maximum, name) {
-  if (!Array.isArray(value)) throw new Error(`Workspace ${name} must be an array.`);
-  if (value.length > maximum) throw new Error(`Workspace ${name} exceed the supported limit.`);
+  if (!Array.isArray(value))
+    throw new Error(`Workspace ${name} must be an array.`);
+  if (value.length > maximum)
+    throw new Error(`Workspace ${name} exceed the supported limit.`);
   return value;
 }
 function entity(value, name, allIds) {
-  if (!isRecord(value) || !isClientId(value.id)) throw new Error(`Workspace ${name} has an invalid ID.`);
+  if (!isRecord(value) || !isClientId(value.id))
+    throw new Error(`Workspace ${name} has an invalid ID.`);
   if (allIds.has(value.id)) throw new Error(`Duplicate entity ID: ${value.id}`);
   allIds.add(value.id);
   return value;
 }
 function text(value, minimum, maximum, name) {
-  if (typeof value !== "string" || value.length < minimum || value.length > maximum) throw new Error(`${name} is invalid.`);
+  if (
+    typeof value !== "string" ||
+    value.length < minimum ||
+    value.length > maximum
+  )
+    throw new Error(`${name} is invalid.`);
   return value;
 }
 function boolean(value, name) {
@@ -254,7 +321,8 @@ function boolean(value, name) {
   return value;
 }
 function color(value) {
-  if (typeof value !== "string" || !/^#[0-9a-f]{6}$/i.test(value)) throw new Error("Workspace color is invalid.");
+  if (typeof value !== "string" || !/^#[0-9a-f]{6}$/i.test(value))
+    throw new Error("Workspace color is invalid.");
   return value.toLowerCase();
 }
 function order(value, fallback) {
@@ -263,6 +331,15 @@ function order(value, fallback) {
   return result;
 }
 function timestamp(value, name) {
-  if (!isUtcTimestamp(value)) throw new Error(`${name} must be a canonical UTC timestamp.`);
+  if (!isUtcTimestamp(value))
+    throw new Error(`${name} must be a canonical UTC timestamp.`);
   return value;
 }
+
+export {
+  COMMAND_LOG_LIMIT,
+  DomainError,
+  InMemoryWorkspaceRepository,
+  applyCommand,
+  rebalanceOrders,
+} from "./commands.js";
