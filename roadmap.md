@@ -1,7 +1,7 @@
 # Tabby Remaining Work Roadmap
 
 > **Status:** execution plan after the local web alpha, safe-capture extension spike, and shared-contract foundation
-> **Last updated:** 2026-07-27
+> **Last updated:** 2026-07-28
 > **Team model:** two developers working in parallel, each assisted by AI
 > **Reference:** TabExtend is workflow inspiration only; use original code, design, copy, and assets
 
@@ -33,17 +33,17 @@ Out of scope: UI styling, browser permissions
 
 ### Conflict map
 
-| Topic | Primary ownership boundary | Coordinate before touching |
-| --- | --- | --- |
-| Product/brand | `docs/product-review/**`, governance files | landing copy, store copy |
-| Contracts/domain | shared contract/domain packages | every persisted/API shape |
-| Local store | IndexedDB repositories/migrations | domain schemas, UI commands |
-| Browser platform | browser adapter, worker, manifest | permissions, capture rules |
-| Extension UI | extension entry points/components/styles | shared UI tokens, commands |
-| Web app | `src/app/**`, web client adapters | landing routes, domain contracts |
-| Landing/docs | marketing routes/assets, README/docs | root routing and brand system |
-| Hosted backend | `src/server/**`, Drizzle migrations | contracts, auth, sync protocol |
-| Quality/release | CI, fixtures, E2E, release scripts | all topic-specific test owners |
+| Topic            | Primary ownership boundary                 | Coordinate before touching       |
+| ---------------- | ------------------------------------------ | -------------------------------- |
+| Product/brand    | `docs/product-review/**`, governance files | landing copy, store copy         |
+| Contracts/domain | shared contract/domain packages            | every persisted/API shape        |
+| Local store      | IndexedDB repositories/migrations          | domain schemas, UI commands      |
+| Browser platform | browser adapter, worker, manifest          | permissions, capture rules       |
+| Extension UI     | extension entry points/components/styles   | shared UI tokens, commands       |
+| Web app          | `src/app/**`, web client adapters          | landing routes, domain contracts |
+| Landing/docs     | marketing routes/assets, README/docs       | root routing and brand system    |
+| Hosted backend   | `src/server/**`, Drizzle migrations        | contracts, auth, sync protocol   |
+| Quality/release  | CI, fixtures, E2E, release scripts         | all topic-specific test owners   |
 
 Files with high conflict risk (`package.json`, lockfile, root configs, shared schemas, manifest, root layout/styles) require a short coordination note before editing.
 
@@ -61,15 +61,15 @@ These are foundations, not a finished product. The web and extension still use s
 
 The lanes below maximize parallel work while protecting data-model and configuration hotspots.
 
-| Sprint | Developer A | Developer B | Integration gate |
-| --- | --- | --- | --- |
-| 0 | T0.1 governance/brand decisions | T9.1 repair quality scripts/CI baseline | license/name decided; green baseline |
-| 1 | T1.1 canonical domain model | T7.1 landing information architecture and original wireframe | contracts reviewed; no shared UI implementation yet |
-| 2 | T2.1 IndexedDB entity store | T4.1 Plasmo parallel shell | persistence interfaces frozen; permission diff clean |
-| 3 | T3.1 browser capability adapter | T5.1 accessible design system | commands and UI primitives integrate through interfaces |
-| 4 | T4.2 extension organization UI | T7.2 landing implementation | separate routes/apps and styles; both pass build/a11y |
-| 5 | T4.3 restore/search/import | T6.1 web workspace convergence | common export fixtures and interaction terminology |
-| 6 | T9.2 E2E/recovery matrix | T8.1 optional account foundation | local release gate before sync begins |
+| Sprint | Developer A                     | Developer B                                                  | Integration gate                                        |
+| ------ | ------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
+| 0      | T0.1 governance/brand decisions | T9.1 repair quality scripts/CI baseline                      | license/name decided; green baseline                    |
+| 1      | T1.1 canonical domain model     | T7.1 landing information architecture and original wireframe | contracts reviewed; no shared UI implementation yet     |
+| 2      | T2.1 IndexedDB entity store     | T4.1 Plasmo parallel shell                                   | persistence interfaces frozen; permission diff clean    |
+| 3      | T3.1 browser capability adapter | T5.1 accessible design system                                | commands and UI primitives integrate through interfaces |
+| 4      | T4.2 extension organization UI  | T7.2 landing implementation                                  | separate routes/apps and styles; both pass build/a11y   |
+| 5      | T4.3 restore/search/import      | T6.1 web workspace convergence                               | common export fixtures and interaction terminology      |
+| 6      | T9.2 E2E/recovery matrix        | T8.1 optional account foundation                             | local release gate before sync begins                   |
 
 After Sprint 6, prioritize observed private-alpha problems. Do not start sync merely because a developer is free.
 
@@ -78,7 +78,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T0.1 — Decide identity and legal foundation
 
 **Owner:** `@tommy`
-**Status:** `blocked`
+**Status:** `in-progress` (SECURITY.md + issue/PR templates added; trademark/DCO decisions remain)
 **Touch set:** root legal/community files, `docs/product-review/**`
 **Depends on:** none
 
@@ -86,7 +86,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 
 - Confirm project name after trademark, package, repository, and domain checks.
 - MIT license selected and added; confirm copyright attribution with the project owner before the first public release.
-- `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` added. `SECURITY.md`, support boundaries, and the DCO/CLA decision remain.
+- `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` added. `SECURITY.md` and GitHub issue/PR templates added; support boundaries and the DCO/CLA decision remain.
 - Define maintainer roles, issue/PR templates, decision process, and release ownership.
 - Record product terminology so web, extension, landing page, and store listing do not drift.
 
@@ -111,7 +111,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T1.1 — Canonical local workspace model
 
 **Owner:** `@tommy`
-**Status:** `in-progress`
+**Status:** `done`
 **Touch set:** shared contracts/domain package, contract tests, ADR
 **Depends on:** T0.1 terminology
 
@@ -120,14 +120,14 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 - Move web-only validation/search rules behind dependency-free contracts without introducing React, Next.js, IndexedDB, SQL, or `chrome.*` dependencies.
 - Preserve web schema v1 and extension journal v1/v2 fixtures; unknown future versions fail closed and report recovery guidance.
 
-**Validation note:** dependency-free contract and migration tests pass; completion remains gated on the registry-backed T9.1 install/typecheck/build checks.
+**Validation note:** dependency-free contract and migration tests pass; web app now migrates v1→v2 on load and exports schema v2.
 
 **Done when:** both clients consume one vocabulary; import/export round trips are deterministic; migration and malicious-input fixtures pass.
 
 ### T1.2 — Command and repository interfaces
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done`
 **Touch set:** domain application service/interfaces and tests
 **Depends on:** T1.1
 
@@ -135,6 +135,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 - Keep transaction durability distinct from browser-side effects; require idempotency keys for retryable commands.
 - Define typed error categories for validation, quota, corruption, permissions, partial browser failure, and unsupported capability.
 - Add invariant and property tests for reorders, replay, duplicate identity, and rollback.
+- Web `/app` now applies mutations through `applyCommand` (create/rename/trash/restore/toggle/createItem/import).
 
 **Done when:** UIs can use commands without knowing IndexedDB or Chromium implementation details.
 
@@ -294,7 +295,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T6.2 — Application routing boundary
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done`
 **Touch set:** Next.js routing/layout only; coordinate with T7.2
 **Depends on:** T7.1
 
@@ -304,7 +305,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 
 **Recommendation:** use `/` for the public landing page and `/app` for the web workspace before public launch, with an explicit migration/redirect plan.
 
-**Done when:** route ownership is documented and both surfaces can deploy/test independently.
+**Done when:** route ownership is documented and both surfaces can deploy/test independently. **Shipped:** `/` marketing, `/app` workspace.
 
 ## 11. Topic 7 — Landing page and public documentation
 
@@ -328,7 +329,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T7.2 — Implement the landing page
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done` (Lighthouse budgets/smoke suite still follow-up)
 **Touch set:** dedicated marketing route/components/assets; coordinate root layout/styles once
 **Depends on:** T5.1, T6.2, T7.1
 

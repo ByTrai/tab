@@ -1,0 +1,79 @@
+:root {
+  /* Brand direction: teal / ink / sand */
+  --ink: #14212b;
+  --ink-soft: #243442;
+  --teal: #0f766e;
+  --teal-bright: #14b8a6;
+  --teal-deep: #0b4f4a;
+  --sand: #e8dfd0;
+  --sand-warm: #f3ebe0;
+  --sand-deep: #c4b39a;
+  --paper: #f7f3ec;
+  --foam: #fbfaf7;
+  --line: color-mix(in oklab, var(--ink) 12%, transparent);
+  --muted: color-mix(in oklab, var(--ink) 58%, white);
+  --danger: #9f1239;
+  --ok: #3f6f56;
+  --shadow: color-mix(in oklab, var(--ink) 18%, transparent);
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-ibm-plex), "IBM Plex Sans", system-ui, sans-serif;
+  --radius: 12px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  z-index: 50;
+  padding: 0.6rem 0.9rem;
+  background: var(--ink);
+  color: var(--foam);
+  border-radius: 8px;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
