@@ -20,7 +20,7 @@ Reviewed Tabby against the TabExtend-like local-first private-alpha goal (save �
 | Security      | Legacy capture URLs re-opened without re-validation                 | **Fixed** in extension open/restore/undo paths                                                   |
 | Security      | Soft-delete vs immediate hard delete on web                         | **Fixed** (trash + restore)                                                                      |
 | Security      | Missing private disclosure channel                                  | **Fixed** (`SECURITY.md`)                                                                        |
-| Security      | Transitive `sharp` (Next) / `esbuild` (drizzle-kit via better-auth) | **Accepted residual** — documented; audit policy warns, does not `--force` downgrade Next        |
+| Security      | Transitive `sharp` (Next) / `esbuild` (drizzle-kit via better-auth) | **Fixed** — `sharp@0.35.3` override; stub unused `@esbuild-kit/esm-loader` (`npm audit --omit=dev` clean) |
 | Perf          | Whole-aggregate IDB writes on web                                   | **Mitigated path** — entity store package ready; web still flat document until full T2.1 cutover |
 | Perf          | Web search nested finds                                             | **Fixed** (Maps)                                                                                 |
 | Perf          | Extension capture journal still whole-state put                     | **Open** — entity store used for organize; journal migration remaining                           |
@@ -41,7 +41,7 @@ Reviewed Tabby against the TabExtend-like local-first private-alpha goal (save �
 1. Cut web IndexedDB over to `@tabby/local-store` EntityRepository with fixture migration drills (finish T2.1).
 2. Wire Playwright extension E2E into CI with worker-termination checkpoints (T9.2).
 3. Add Plasmo parallel shell only after organize/restore private-alpha feedback (T4.1).
-4. Revisit sharp/esbuild when Next and drizzle-kit publish patched releases; remove warn-only allowlist entries.
+4. Revisit removing the `sharp` / `@esbuild-kit` overrides once Next and drizzle-kit publish patched dependency trees.
 5. Do not enable better-auth plugins (api-key, oidc, mcp, organization) without a dedicated threat-model review.
 
 ## 5. Prompt for next task
