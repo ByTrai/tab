@@ -20,7 +20,7 @@ Reviewed Tabby against the TabExtend-like local-first private-alpha goal (save �
 | Security      | Legacy capture URLs re-opened without re-validation                 | **Fixed** in extension open/restore/undo paths                                                   |
 | Security      | Soft-delete vs immediate hard delete on web                         | **Fixed** (trash + restore)                                                                      |
 | Security      | Missing private disclosure channel                                  | **Fixed** (`SECURITY.md`)                                                                        |
-| Security      | Transitive `sharp` (Next) / `esbuild` (drizzle-kit via better-auth) | **Accepted residual** — documented; audit policy warns, does not `--force` downgrade Next        |
+| Security      | Transitive `sharp` (Next) / `esbuild` (drizzle-kit via better-auth) | **Fixed** — `sharp@0.35.3` override; stub unused `@esbuild-kit/esm-loader` (`npm audit --omit=dev` clean) |
 | Perf          | Whole-aggregate IDB writes on web                                   | **Mitigated path** — entity store package ready; web still flat document until full T2.1 cutover |
 | Perf          | Web search nested finds                                             | **Fixed** (Maps)                                                                                 |
 | Perf          | Extension capture journal still whole-state put                     | **Open** — entity store used for organize; journal migration remaining                           |
