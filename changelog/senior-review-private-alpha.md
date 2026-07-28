@@ -41,7 +41,7 @@ Reviewed Tabby against the TabExtend-like local-first private-alpha goal (save â
 1. Cut web IndexedDB over to `@tabby/local-store` EntityRepository with fixture migration drills (finish T2.1).
 2. Wire Playwright extension E2E into CI with worker-termination checkpoints (T9.2).
 3. Add Plasmo parallel shell only after organize/restore private-alpha feedback (T4.1).
-4. Revisit sharp/esbuild when Next and drizzle-kit publish patched releases; remove warn-only allowlist entries.
+4. Revisit removing the `sharp` / `@esbuild-kit` overrides once Next and drizzle-kit publish patched dependency trees.
 5. Do not enable better-auth plugins (api-key, oidc, mcp, organization) without a dedicated threat-model review.
 
 ## 5. Prompt for next task
