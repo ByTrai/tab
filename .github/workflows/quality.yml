@@ -28,6 +28,20 @@ jobs:
       - run: npm run build
         env:
           SKIP_ENV_VALIDATION: "1"
+      - run: npm run bench:local-store
+
+  extension-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm install
+      - run: npx playwright install chromium --with-deps
+      - name: Extension Playwright E2E
+        run: xvfb-run -a npm run test:e2e:extension
 
   secrets:
     runs-on: ubuntu-latest

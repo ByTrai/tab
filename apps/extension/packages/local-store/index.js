@@ -29,7 +29,12 @@ const META_KEYS = Object.freeze({
   operationOrder: "operationOrder",
   migratedCapture: "migratedCapture",
   migratedWeb: "migratedWeb",
+  commandLog: "commandLog",
+  trashRetentionMs: "trashRetentionMs",
 });
+
+/** Default soft-trash retention: 30 days (owner decision for T2.2). */
+export const DEFAULT_TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
 const RECOVERY_HINT =
   "Export a backup if you can still open Tabby, then clear site data and re-import to recover.";
@@ -184,6 +189,42 @@ export function memoryRepository(initial = {}) {
     },
     async migrateFromLegacyWebAggregate(input) {
       state = migrateWebIntoState(state, input);
+    },
+    async putTrashRecord(record) {
+      if (!isValidTrashRecord(record)) {
+        throw new Error("Trash record is invalid.");
+      }
+      state.trash = upsertById(state.trash, record);
+    },
+    async clearTrash() {
+      state = { ...cloneState(state), trash: [] };
+    },
+    async purgeExpiredTrash({ deletedBefore, now } = {}) {
+      const cutoff =
+        deletedBefore ??
+        new Date(
+          Date.parse(now ?? new Date().toISOString()) -
+            DEFAULT_TRASH_RETENTION_MS,
+        ).toISOString();
+      const before = state.trash.length;
+      state = {
+        ...cloneState(state),
+        trash: state.trash.filter((entry) => entry.deletedAt >= cutoff),
+      };
+      return { purged: before - state.trash.length, deletedBefore: cutoff };
+    },
+    async getMeta(key) {
+      if (key === META_KEYS.operationOrder) {
+        return [...(state.meta.operationOrder ?? [])];
+      }
+      return state.meta?.[key];
+    },
+    async setMeta(key, value) {
+      if (key === META_KEYS.operationOrder) {
+        state.meta.operationOrder = Array.isArray(value) ? [...value] : [];
+        return;
+      }
+      state.meta = { ...state.meta, [key]: clone(value) };
     },
   };
 }
@@ -396,11 +437,13 @@ export class EntityRepository {
 
   async migrateFromLegacyWebAggregate(input) {
     const canonical = migrateWorkspaceExport(input);
+    const legacyExtras = extractLegacyTrash(input);
     await this._write(
       [
         STORE_NAMES.workspaces,
         STORE_NAMES.groups,
         STORE_NAMES.items,
+        STORE_NAMES.trash,
         STORE_NAMES.meta,
       ],
       async (stores) => {
@@ -409,14 +452,69 @@ export class EntityRepository {
         for (const group of canonical.groups)
           await putRecord(stores.groups, group);
         for (const item of canonical.items) await putRecord(stores.items, item);
+        for (const record of trashBundleToRecords(legacyExtras.trash)) {
+          await putRecord(stores.trash, record);
+        }
         await putMeta(stores.meta, META_KEYS.migratedWeb, true);
         await putMeta(
           stores.meta,
           "lastExportSchemaVersion",
           canonical.schemaVersion,
         );
+        if (legacyExtras.commandLog.length > 0) {
+          await putMeta(
+            stores.meta,
+            META_KEYS.commandLog,
+            legacyExtras.commandLog,
+          );
+        }
       },
     );
+  }
+
+  async putTrashRecord(record) {
+    if (!isValidTrashRecord(record)) {
+      throw new Error("Trash record is invalid.");
+    }
+    await this._write([STORE_NAMES.trash], async (stores) => {
+      await putRecord(stores.trash, record);
+    });
+  }
+
+  async clearTrash() {
+    await this._write([STORE_NAMES.trash], async (stores) => {
+      await clearStore(stores.trash);
+    });
+  }
+
+  async purgeExpiredTrash({ deletedBefore, now } = {}) {
+    const cutoff =
+      deletedBefore ??
+      new Date(
+        Date.parse(now ?? new Date().toISOString()) -
+          DEFAULT_TRASH_RETENTION_MS,
+      ).toISOString();
+    return this._write([STORE_NAMES.trash], async (stores) => {
+      const all = await getAllRecords(stores.trash);
+      let purged = 0;
+      for (const record of all) {
+        if (record.deletedAt < cutoff) {
+          await deleteRecord(stores.trash, record.id);
+          purged += 1;
+        }
+      }
+      return { purged, deletedBefore: cutoff };
+    });
+  }
+
+  async getMeta(key) {
+    return this._read(async (stores) => getMeta(stores.meta, key));
+  }
+
+  async setMeta(key, value) {
+    await this._write([STORE_NAMES.meta], async (stores) => {
+      await putMeta(stores.meta, key, value);
+    });
   }
 
   /**
@@ -793,15 +891,120 @@ function migrateCaptureIntoState(state, input) {
  */
 function migrateWebIntoState(state, input) {
   const canonical = migrateWorkspaceExport(input);
+  const legacyExtras = extractLegacyTrash(input);
   const next = cloneState(state);
   for (const workspace of canonical.workspaces)
     next.workspaces = upsertById(next.workspaces, workspace);
   for (const group of canonical.groups)
     next.groups = upsertById(next.groups, group);
   for (const item of canonical.items) next.items = upsertById(next.items, item);
+  for (const record of trashBundleToRecords(legacyExtras.trash)) {
+    next.trash = upsertById(next.trash, record);
+  }
   next.meta.migratedWeb = true;
   next.meta.lastExportSchemaVersion = canonical.schemaVersion;
+  if (legacyExtras.commandLog.length > 0) {
+    next.meta.commandLog = legacyExtras.commandLog;
+  }
   return next;
+}
+
+/**
+ * Maps entity trash records into the command-layer TrashBundle shape.
+ * @param {import("./index.js").TrashRecord[]} records
+ */
+export function trashRecordsToBundle(records) {
+  const items = [];
+  const tombstones = [];
+  for (const record of sortTrash(records)) {
+    tombstones.push({
+      id: record.id,
+      entityId: record.entityId,
+      entityType: record.entityType,
+      deletedAt: record.deletedAt,
+    });
+    if (record.entityType === "item" && isCanonicalItem(record.snapshot)) {
+      items.push(clone(record.snapshot));
+    }
+  }
+  return { items, tombstones };
+}
+
+/**
+ * @param {{ items?: object[]; tombstones?: object[] }} trash
+ * @returns {import("./index.js").TrashRecord[]}
+ */
+export function trashBundleToRecords(trash) {
+  const items = Array.isArray(trash?.items) ? trash.items : [];
+  const tombstones = Array.isArray(trash?.tombstones) ? trash.tombstones : [];
+  const byEntityId = new Map();
+  for (const item of items) {
+    if (!item || typeof item.id !== "string") continue;
+    const tombstone = tombstones.find(
+      (entry) => entry && entry.entityId === item.id,
+    );
+    const deletedAt =
+      tombstone && typeof tombstone.deletedAt === "string"
+        ? tombstone.deletedAt
+        : new Date().toISOString();
+    const id =
+      tombstone && typeof tombstone.id === "string"
+        ? tombstone.id
+        : `trash:${item.id}:${deletedAt}`;
+    byEntityId.set(item.id, {
+      id,
+      entityId: item.id,
+      entityType: "item",
+      deletedAt,
+      snapshot: clone(item),
+    });
+  }
+  for (const tombstone of tombstones) {
+    if (!tombstone || typeof tombstone.entityId !== "string") continue;
+    if (byEntityId.has(tombstone.entityId)) continue;
+    byEntityId.set(tombstone.entityId, {
+      id:
+        typeof tombstone.id === "string"
+          ? tombstone.id
+          : `trash:${tombstone.entityId}:${tombstone.deletedAt}`,
+      entityId: tombstone.entityId,
+      entityType: tombstone.entityType ?? "item",
+      deletedAt: tombstone.deletedAt,
+      snapshot: { id: tombstone.entityId },
+    });
+  }
+  return [...byEntityId.values()];
+}
+
+/**
+ * @param {unknown} input
+ * @returns {{ trash: { items: object[]; tombstones: object[] }; commandLog: object[] }}
+ */
+function extractLegacyTrash(input) {
+  if (!isRecord(input)) {
+    return { trash: { items: [], tombstones: [] }, commandLog: [] };
+  }
+  const trashSource = isRecord(input.trash) ? input.trash : null;
+  const trash = {
+    items: Array.isArray(trashSource?.items) ? trashSource.items : [],
+    tombstones: Array.isArray(trashSource?.tombstones)
+      ? trashSource.tombstones
+      : [],
+  };
+  const commandLog = Array.isArray(input.commandLog) ? input.commandLog : [];
+  return { trash, commandLog };
+}
+
+/** @param {unknown} record */
+function isValidTrashRecord(record) {
+  return (
+    isRecord(record) &&
+    typeof record.id === "string" &&
+    typeof record.entityId === "string" &&
+    typeof record.entityType === "string" &&
+    typeof record.deletedAt === "string" &&
+    isRecord(record.snapshot)
+  );
 }
 
 /**

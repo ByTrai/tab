@@ -136,6 +136,27 @@ export function orderBetween(
 export function migrateWorkspaceExport(input: unknown): WorkspaceExportV2;
 export function serializeWorkspaceExport(value: WorkspaceExportV2): string;
 
+export interface WorkspaceImportCounts {
+  creates: number;
+  updates: number;
+  removes: number;
+  total: number;
+}
+
+export interface WorkspaceImportPreview {
+  schemaVersion: 2;
+  workspaces: WorkspaceImportCounts;
+  groups: WorkspaceImportCounts;
+  items: WorkspaceImportCounts;
+  canonical: WorkspaceExportV2;
+  summary: string;
+}
+
+export function previewWorkspaceImport(
+  payload: unknown,
+  current?: WorkspaceExportV2 | null,
+): WorkspaceImportPreview;
+
 export {
   COMMAND_LOG_LIMIT,
   DomainError,

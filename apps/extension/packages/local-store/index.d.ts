@@ -5,11 +5,14 @@ import type {
   CanonicalGroup,
   CanonicalItem,
   CanonicalWorkspace,
+  CommandLogEntry,
+  TrashBundle,
   WorkspaceExportV2,
 } from "@tabby/workspace-contracts";
 
 export const ENTITY_DB_NAME: "tabby-entities";
 export const ENTITY_DB_VERSION: 1;
+export const DEFAULT_TRASH_RETENTION_MS: number;
 export const STORE_NAMES: Readonly<{
   workspaces: "workspaces";
   groups: "groups";
@@ -39,6 +42,8 @@ export interface EntityMeta {
   migratedCapture?: boolean;
   migratedWeb?: boolean;
   lastExportSchemaVersion?: number;
+  commandLog?: CommandLogEntry[];
+  trashRetentionMs?: number;
   [key: string]: unknown;
 }
 
@@ -49,6 +54,11 @@ export interface EntityState {
   trash: TrashRecord[];
   operations: CaptureOperationV2[];
   meta: EntityMeta;
+}
+
+export interface PurgeTrashResult {
+  purged: number;
+  deletedBefore: string;
 }
 
 export interface EntityRepositoryLike {
@@ -75,6 +85,14 @@ export interface EntityRepositoryLike {
   >;
   migrateFromLegacyCaptureState(input: unknown): Promise<void>;
   migrateFromLegacyWebAggregate(input: unknown): Promise<void>;
+  putTrashRecord(record: TrashRecord): Promise<void>;
+  clearTrash(): Promise<void>;
+  purgeExpiredTrash(options?: {
+    deletedBefore?: string;
+    now?: string;
+  }): Promise<PurgeTrashResult>;
+  getMeta(key: string): Promise<unknown>;
+  setMeta(key: string, value: unknown): Promise<void>;
 }
 
 export function createEmptyEntityState(): EntityState;
@@ -86,6 +104,10 @@ export function applyExportToMemory(
 export function memoryRepository(
   initial?: Partial<EntityState>,
 ): EntityRepositoryLike;
+export function trashRecordsToBundle(records: TrashRecord[]): TrashBundle;
+export function trashBundleToRecords(
+  trash: Pick<TrashBundle, "items" | "tombstones"> | TrashBundle,
+): TrashRecord[];
 
 export class EntityRepository implements EntityRepositoryLike {
   constructor(options?: { indexedDB?: IDBFactory });
@@ -112,4 +134,12 @@ export class EntityRepository implements EntityRepositoryLike {
   >;
   migrateFromLegacyCaptureState(input: CaptureStateV2 | unknown): Promise<void>;
   migrateFromLegacyWebAggregate(input: unknown): Promise<void>;
+  putTrashRecord(record: TrashRecord): Promise<void>;
+  clearTrash(): Promise<void>;
+  purgeExpiredTrash(options?: {
+    deletedBefore?: string;
+    now?: string;
+  }): Promise<PurgeTrashResult>;
+  getMeta(key: string): Promise<unknown>;
+  setMeta(key: string, value: unknown): Promise<void>;
 }

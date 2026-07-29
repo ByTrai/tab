@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DomainError,
-  applyCommand,
+  previewWorkspaceImport,
   serializeWorkspaceExport,
   type CanonicalItem,
   type WorkspaceCommand,
@@ -17,7 +17,7 @@ import {
   sortByOrder,
   type WorkspaceSnapshotData,
 } from "~/lib/workspace";
-import { loadWorkspace, saveWorkspace } from "~/lib/workspace-store";
+import { applyWorkspaceCommand, loadWorkspace } from "~/lib/workspace-store";
 
 type ItemKind = CanonicalItem["kind"];
 type ThemeMode = "light" | "dark";
@@ -75,14 +75,33 @@ export function WorkspaceApp() {
 
     void loadWorkspace()
       .then((loaded) => {
-        snapshotRef.current = loaded;
-        setSnapshot(loaded);
+        const next: WorkspaceSnapshotData = {
+          state: loaded.state,
+          trash: loaded.trash,
+          commandLog: loaded.commandLog,
+        };
+        snapshotRef.current = next;
+        setSnapshot(next);
         setActiveId(
           sortByOrder(loaded.state.workspaces).find(
             (workspace) => !workspace.archived,
           )?.id ?? "",
         );
-        setStatus("Saved locally");
+        if (loaded.migratedFromLegacy && loaded.legacyBackupJson) {
+          const blob = new Blob([loaded.legacyBackupJson], {
+            type: "application/json",
+          });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `tabby-pre-migration-backup-${new Date().toISOString().slice(0, 10)}.json`;
+          link.click();
+          URL.revokeObjectURL(link.href);
+          setStatus(
+            "Migrated to the indexed local store — a pre-migration backup was downloaded",
+          );
+        } else {
+          setStatus("Saved locally");
+        }
       })
       .catch((error: unknown) =>
         setStatus(
@@ -98,48 +117,17 @@ export function WorkspaceApp() {
     }
   }, [dialog]);
 
-  const persist = async (
-    next: WorkspaceSnapshotData,
-    message = "Saved locally",
-  ) => {
-    setStatus("Saving…");
-    try {
-      await saveWorkspace(next);
-      snapshotRef.current = next;
-      setSnapshot(next);
-      setStatus(message);
-    } catch (error) {
-      setStatus(
-        error instanceof Error
-          ? error.message
-          : "Save failed — no changes were applied",
-      );
-      throw error;
-    }
-  };
-
   const runCommand = async (
     command: WorkspaceCommand,
     message?: string,
   ): Promise<WorkspaceSnapshotData | null> => {
     try {
-      const current = snapshotRef.current;
-      const applied = applyCommand(
-        {
-          state: current.state,
-          trash: current.trash,
-          commandLog: current.commandLog,
-          createId,
-        },
-        command,
-      );
-      const next: WorkspaceSnapshotData = {
-        state: applied.state,
-        trash: applied.trash,
-        commandLog: applied.commandLog,
-      };
-      await persist(next, message);
-      return next;
+      setStatus("Saving…");
+      const applied = await applyWorkspaceCommand(command, { createId });
+      snapshotRef.current = applied.snapshot;
+      setSnapshot(applied.snapshot);
+      setStatus(message ?? "Saved locally");
+      return applied.snapshot;
     } catch (error) {
       setStatus(
         error instanceof DomainError
@@ -311,10 +299,11 @@ export function WorkspaceApp() {
       if (file.size > 10_000_000)
         throw new Error("Import is larger than the 10 MB limit");
       const payload: unknown = JSON.parse(await file.text());
-      // Dry-run validation happens inside importExport command; preview counts loosely.
-      const record = payload as { workspaces?: unknown[]; items?: unknown[] };
-      const summary = `Replace local data with ${Array.isArray(record.items) ? record.items.length : "?"} items in ${Array.isArray(record.workspaces) ? record.workspaces.length : "?"} workspaces? Trash will be cleared.`;
-      setPendingImport({ payload, summary });
+      const preview = previewWorkspaceImport(
+        payload,
+        snapshotRef.current.state,
+      );
+      setPendingImport({ payload, summary: preview.summary });
       setDialog("import");
     } catch (error) {
       setStatus(
@@ -343,12 +332,6 @@ export function WorkspaceApp() {
       return;
     }
     const next = snapshotRef.current;
-    // Clear trash after replace so local soft-deletes do not leak across imports.
-    const cleared: WorkspaceSnapshotData = {
-      ...next,
-      trash: EMPTY_TRASH,
-    };
-    await persist(cleared, "Backup imported");
     setActiveId(next.state.workspaces[0]?.id ?? "");
     setDialog(null);
     setPendingImport(null);

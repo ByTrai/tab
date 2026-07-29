@@ -21,15 +21,19 @@
     "preview": "next build && next start",
     "start": "next start",
     "test:extension": "node --test apps/extension/test/*.test.js",
+    "test:e2e": "playwright test",
+    "test:e2e:extension": "playwright test apps/extension/e2e",
     "typecheck": "tsc --noEmit",
     "check:manifest": "node scripts/check-extension-manifest.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
     "audit:dependencies": "node scripts/audit-production.mjs",
     "roadmap:issues": "node scripts/create-roadmap-issues.mjs",
-    "test:roadmap-issues": "node --test scripts/create-roadmap-issues.test.mjs"
+    "test:roadmap-issues": "node --test scripts/create-roadmap-issues.test.mjs",
+    "bench:local-store": "node scripts/bench-local-store.mjs"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.12.0",
+    "@tabby/local-store": "*",
     "@tabby/workspace-contracts": "*",
     "@tanstack/react-query": "^5.69.0",
     "@trpc/client": "^11.0.0",
@@ -47,6 +51,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "^1.54.1",
     "@tailwindcss/postcss": "^4.0.15",
     "@types/node": "^20.14.10",
     "@types/react": "^19.0.0",

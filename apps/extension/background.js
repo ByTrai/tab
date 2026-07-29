@@ -23,6 +23,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     }),
     workspaceState: () => service.workspaceState(),
     applyWorkspaceCommand: () => service.applyWorkspaceCommand(message.command),
+    putWorkspaceItem: async () => {
+      if (!service.entities) {
+        throw new Error("Workspace organization store is unavailable.");
+      }
+      const item = message.item;
+      if (!item || typeof item !== "object" || typeof item.id !== "string") {
+        throw new Error("Workspace item is required.");
+      }
+      await service.entities.putItem(item);
+      return item;
+    },
     restore: () => service.restoreItems(message.payload),
     recover: () => service.recoverInterrupted(),
   };

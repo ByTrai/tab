@@ -1,4 +1,8 @@
-import { normalizeHttpUrl } from "./packages/workspace-contracts/index.js";
+import {
+  normalizeHttpUrl,
+  previewWorkspaceImport,
+  serializeWorkspaceExport,
+} from "./packages/workspace-contracts/index.js";
 
 const tabsRoot = document.querySelector("#tabs");
 const savedRoot = document.querySelector("#saved");
@@ -16,18 +20,28 @@ const restoreSelectedButton = document.querySelector("#restore-selected");
 const trashSelectedButton = document.querySelector("#trash-selected");
 const newWorkspaceButton = document.querySelector("#new-workspace");
 const newGroupButton = document.querySelector("#new-group");
+const newNoteButton = document.querySelector("#new-note");
+const exportButton = document.querySelector("#export-workspace");
+const importInput = document.querySelector("#import-workspace");
+const saveHint = document.querySelector("#save-hint");
 
 let inventory = [];
 let lastCommandId = null;
-/** @type {{ workspaces: any[]; groups: any[]; items: any[] }} */
+/** @type {{ workspaces: any[]; groups: any[]; items: any[]; trash?: any[] }} */
 let workspace = { workspaces: [], groups: [], items: [] };
 let searchQuery = "";
+/** @type {ReturnType<typeof setTimeout> | null} */
+let noteSaveTimer = null;
 
 async function request(message) {
   const response = await chrome.runtime.sendMessage(message);
   if (!response?.ok)
     throw new Error(response?.error || "The extension did not respond.");
   return response.value;
+}
+
+function setSaveHint(message) {
+  if (saveHint) saveHint.textContent = message;
 }
 
 function selectedTabIds() {
@@ -91,7 +105,8 @@ function renderInventory() {
 
 function matchesSearch(item) {
   if (!searchQuery) return true;
-  const haystack = `${item.title ?? ""} ${item.url ?? ""}`.toLowerCase();
+  const haystack =
+    `${item.title ?? ""} ${item.url ?? ""} ${item.content ?? ""} ${item.kind ?? ""}`.toLowerCase();
   return haystack.includes(searchQuery);
 }
 
@@ -101,6 +116,90 @@ function sortByOrder(list) {
     const rightOrder = Number.isFinite(right.order) ? right.order : 0;
     return leftOrder - rightOrder;
   });
+}
+
+function defaultInboxGroup() {
+  const active = sortByOrder(workspace.workspaces).find(
+    (entry) => !entry.archived,
+  );
+  if (!active) return null;
+  const groups = sortByOrder(
+    workspace.groups.filter((group) => group.workspaceId === active.id),
+  );
+  return groups[0] ? { workspace: active, group: groups[0] } : null;
+}
+
+function renderItemRow(item) {
+  const row = document.createElement("label");
+  row.className = `item-row kind-${item.kind ?? "link"}`;
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "saved-item";
+  checkbox.value = item.id;
+  checkbox.addEventListener("change", syncOrganizeButtons);
+
+  const copy = document.createElement("span");
+  copy.className = "item-copy";
+
+  if (item.kind === "note") {
+    const title = document.createElement("strong");
+    title.textContent = item.title || "Note";
+    const editor = document.createElement("textarea");
+    editor.className = "note-editor";
+    editor.value = item.content ?? "";
+    editor.rows = 3;
+    editor.setAttribute("aria-label", `Edit note ${item.title || item.id}`);
+    editor.addEventListener("click", (event) => event.stopPropagation());
+    editor.addEventListener("input", () => {
+      setSaveHint("Saving note…");
+      if (noteSaveTimer) clearTimeout(noteSaveTimer);
+      noteSaveTimer = setTimeout(() => {
+        void persistNote(item.id, item.groupId, item.title, editor.value);
+      }, 400);
+    });
+    copy.append(title, editor);
+  } else if (item.kind === "task") {
+    const taskLabel = document.createElement("span");
+    taskLabel.className = "task-copy";
+    const taskTitle = document.createElement("strong");
+    taskTitle.textContent = item.title || "Task";
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "ghost task-toggle";
+    toggle.textContent = item.completed ? "Completed" : "Mark done";
+    toggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      void toggleTask(item.id);
+    });
+    taskLabel.append(taskTitle, toggle);
+    copy.append(taskLabel);
+  } else {
+    const safeUrl = normalizeHttpUrl(item.url);
+    if (safeUrl) {
+      const link = document.createElement("a");
+      link.href = safeUrl;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = item.title || safeUrl;
+      link.addEventListener("click", (event) => event.stopPropagation());
+      const detail = document.createElement("small");
+      detail.textContent = new URL(safeUrl).hostname;
+      copy.append(link, detail);
+    } else {
+      const title = document.createElement("strong");
+      title.textContent = item.title || "Unsafe link";
+      const detail = document.createElement("span");
+      detail.className = "unsafe";
+      detail.textContent = String(
+        item.url || "Invalid address — not clickable",
+      );
+      copy.append(title, detail);
+    }
+  }
+
+  row.append(checkbox, copy);
+  return row;
 }
 
 function renderWorkspaces() {
@@ -134,7 +233,9 @@ function renderWorkspaces() {
         workspace.items.filter(
           (item) =>
             item.groupId === group.id &&
-            item.kind === "link" &&
+            (item.kind === "link" ||
+              item.kind === "note" ||
+              item.kind === "task") &&
             matchesSearch(item),
         ),
       );
@@ -151,44 +252,12 @@ function renderWorkspaces() {
       if (items.length === 0) {
         const empty = document.createElement("p");
         empty.className = "empty-tree";
-        empty.textContent = "No links in this group yet.";
+        empty.textContent = "No items in this group yet.";
         groupBlock.append(empty);
       }
 
       for (const item of items) {
-        const row = document.createElement("label");
-        row.className = "item-row";
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "saved-item";
-        checkbox.value = item.id;
-        checkbox.addEventListener("change", syncOrganizeButtons);
-
-        const copy = document.createElement("span");
-        copy.className = "item-copy";
-        const safeUrl = normalizeHttpUrl(item.url);
-        if (safeUrl) {
-          const link = document.createElement("a");
-          link.href = safeUrl;
-          link.target = "_blank";
-          link.rel = "noreferrer";
-          link.textContent = item.title || safeUrl;
-          link.addEventListener("click", (event) => event.stopPropagation());
-          const detail = document.createElement("small");
-          detail.textContent = new URL(safeUrl).hostname;
-          copy.append(link, detail);
-        } else {
-          const title = document.createElement("strong");
-          title.textContent = item.title || "Unsafe link";
-          const detail = document.createElement("span");
-          detail.className = "unsafe";
-          detail.textContent = String(
-            item.url || "Invalid address — not clickable",
-          );
-          copy.append(title, detail);
-        }
-        row.append(checkbox, copy);
-        groupBlock.append(row);
+        groupBlock.append(renderItemRow(item));
       }
       block.append(groupBlock);
     }
@@ -199,10 +268,51 @@ function renderWorkspaces() {
     workspacesRoot.replaceChildren();
     const empty = document.createElement("p");
     empty.className = "empty-tree";
-    empty.textContent = "No saved links match that search.";
+    empty.textContent = "No saved items match that search.";
     workspacesRoot.append(empty);
   }
   syncOrganizeButtons();
+}
+
+async function persistNote(itemId, groupId, title, content) {
+  try {
+    const existing = workspace.items.find((item) => item.id === itemId);
+    const item = {
+      ...(existing ?? {}),
+      id: itemId,
+      groupId,
+      kind: "note",
+      title: title || "Note",
+      content: content.slice(0, 20000),
+      createdAt: existing?.createdAt ?? new Date().toISOString(),
+      order: Number.isFinite(existing?.order) ? existing.order : 0,
+    };
+    await request({ type: "putWorkspaceItem", item });
+    workspace.items = workspace.items.map((entry) =>
+      entry.id === itemId ? item : entry,
+    );
+    setSaveHint("Note saved");
+  } catch (error) {
+    setSaveHint(error instanceof Error ? error.message : "Could not save note");
+  }
+}
+
+async function toggleTask(itemId) {
+  try {
+    await request({
+      type: "applyWorkspaceCommand",
+      command: {
+        type: "toggleTask",
+        commandId: crypto.randomUUID(),
+        itemId,
+      },
+    });
+    await loadWorkspace();
+    status.textContent = "Task updated.";
+  } catch (error) {
+    status.textContent =
+      error instanceof Error ? error.message : "Could not update task";
+  }
 }
 
 async function renderSaved() {
@@ -268,7 +378,7 @@ async function capture(close) {
       operation.failedCloseIds?.length > 0
         ? ` · ${operation.failedCloseIds.length} close(s) failed`
         : "";
-    status.textContent = `${saved} saved${
+    const successMessage = `${saved} saved${
       operation.duplicateTabIds.length
         ? ` · ${operation.duplicateTabIds.length} duplicate(s) skipped`
         : ""
@@ -278,6 +388,7 @@ async function capture(close) {
       : `${saved} tab(s) saved.`;
     toast.hidden = false;
     await Promise.all([loadInventory(), renderSaved(), loadWorkspace()]);
+    status.textContent = successMessage;
   } catch (error) {
     status.textContent =
       error instanceof Error
@@ -363,7 +474,7 @@ trashSelectedButton.addEventListener("click", async () => {
         },
       });
     }
-    status.textContent = `${itemIds.length} link(s) moved to trash.`;
+    status.textContent = `${itemIds.length} item(s) moved to trash.`;
     await loadWorkspace();
   } catch (error) {
     status.textContent =
@@ -421,9 +532,109 @@ newGroupButton.addEventListener("click", async () => {
   }
 });
 
-void Promise.all([loadInventory(), renderSaved(), loadWorkspace()]).catch(
-  (error) => {
+newNoteButton?.addEventListener("click", async () => {
+  const inbox = defaultInboxGroup();
+  if (!inbox) {
+    status.textContent = "Create a workspace before adding a note.";
+    return;
+  }
+  const title = window.prompt("Note title", "Quick note");
+  if (!title?.trim()) return;
+  try {
+    setSaveHint("Saving note…");
+    await request({
+      type: "applyWorkspaceCommand",
+      command: {
+        type: "createItem",
+        commandId: crypto.randomUUID(),
+        groupId: inbox.group.id,
+        kind: "note",
+        title: title.trim().slice(0, 500),
+        content: "",
+      },
+    });
+    await loadWorkspace();
+    setSaveHint("Note saved");
+    status.textContent = `Note “${title.trim()}” added to ${inbox.group.title}.`;
+  } catch (error) {
+    setSaveHint("");
     status.textContent =
-      error instanceof Error ? error.message : "Tabby could not start.";
+      error instanceof Error ? error.message : "Could not create note";
+  }
+});
+
+exportButton?.addEventListener("click", () => {
+  try {
+    const payload = {
+      schemaVersion: 2,
+      workspaces: workspace.workspaces,
+      groups: workspace.groups,
+      items: workspace.items.filter(
+        (item) =>
+          item.kind === "link" || item.kind === "note" || item.kind === "task",
+      ),
+    };
+    const serialized = serializeWorkspaceExport(payload);
+    const blob = new Blob([serialized], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `tabby-extension-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    status.textContent = "Backup exported.";
+  } catch (error) {
+    status.textContent =
+      error instanceof Error ? error.message : "Export failed";
+  }
+});
+
+importInput?.addEventListener("change", async () => {
+  const file = importInput.files?.[0];
+  importInput.value = "";
+  if (!file) return;
+  try {
+    if (file.size > 10_000_000) {
+      throw new Error("Import is larger than the 10 MB limit");
+    }
+    const payload = JSON.parse(await file.text());
+    const current = {
+      schemaVersion: 2,
+      workspaces: workspace.workspaces,
+      groups: workspace.groups,
+      items: workspace.items.filter(
+        (item) =>
+          item.kind === "link" || item.kind === "note" || item.kind === "task",
+      ),
+    };
+    const preview = previewWorkspaceImport(payload, current);
+    const confirmed = window.confirm(preview.summary);
+    if (!confirmed) {
+      status.textContent = "Import cancelled.";
+      return;
+    }
+    await request({
+      type: "applyWorkspaceCommand",
+      command: {
+        type: "importExport",
+        commandId: crypto.randomUUID(),
+        payload,
+      },
+    });
+    await loadWorkspace();
+    status.textContent = "Backup imported.";
+  } catch (error) {
+    status.textContent =
+      error instanceof Error
+        ? `Import failed: ${error.message}`
+        : "Import failed";
+  }
+});
+
+void Promise.all([loadInventory(), renderSaved(), loadWorkspace()]).catch(
+  (eventError) => {
+    status.textContent =
+      eventError instanceof Error
+        ? eventError.message
+        : "Tabby could not start.";
   },
 );

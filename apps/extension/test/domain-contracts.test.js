@@ -98,3 +98,34 @@ test("keeps current capture journals and rejects oversized or non-UTC legacy dat
   v1.items[0].capturedAt = "2026-07-27T14:00:00+02:00";
   assert.throws(() => migrateCaptureState(v1), /invalid item/);
 });
+
+test("previewWorkspaceImport dry-runs creates/updates/removes without writes", async () => {
+  const { previewWorkspaceImport } =
+    await import("../packages/workspace-contracts/index.js");
+  const current = migrateWorkspaceExport(fixture);
+  const incoming = structuredClone(current);
+  incoming.items.push({
+    id: "link-2",
+    groupId: "group-1",
+    kind: "link",
+    title: "New",
+    url: "https://example.com/new",
+    createdAt: "2026-07-28T12:00:00.000Z",
+    order: 2,
+  });
+  incoming.items = incoming.items.filter((item) => item.id !== "task-1");
+
+  const preview = previewWorkspaceImport(incoming, current);
+  assert.equal(preview.items.creates, 1);
+  assert.equal(preview.items.updates, 1);
+  assert.equal(preview.items.removes, 1);
+  assert.match(preview.summary, /Trash will be cleared/);
+  assert.throws(
+    () =>
+      previewWorkspaceImport(
+        { ...incoming, items: [{ ...incoming.items[0], url: "javascript:1" }] },
+        current,
+      ),
+    /Link URL/,
+  );
+});

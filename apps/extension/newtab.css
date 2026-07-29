@@ -201,10 +201,65 @@ header {
 }
 
 .organize-toolbar,
-.organize-actions {
+.organize-actions,
+.backup-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  align-items: center;
+}
+
+.backup-actions {
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.save-hint {
+  margin: 0;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.note-editor {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 6px 0;
+}
+
+.note-editor:focus {
+  outline: none;
+  border-bottom-color: var(--focus);
+}
+
+.task-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-toggle {
+  font-size: 10px;
 }
 
 .workspace-tree {

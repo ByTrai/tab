@@ -117,3 +117,75 @@ test("commitCaptureOperation is idempotent by operation id", async () => {
   await repo.updateOperation({ ...operation, stage: "complete" });
   assert.equal((await repo.getOperation("op-1")).stage, "complete");
 });
+
+test("purgeExpiredTrash removes records older than the retention cutoff", async () => {
+  const repo = memoryRepository();
+  await repo.replaceFromExport(migrateWorkspaceExport(webFixture));
+  const itemId = (await repo.loadExport()).items[0].id;
+  await repo.trashItem(itemId, { deletedAt: "2026-01-01T00:00:00.000Z" });
+
+  const result = await repo.purgeExpiredTrash({
+    deletedBefore: "2026-06-01T00:00:00.000Z",
+  });
+  assert.equal(result.purged, 1);
+  assert.equal((await repo.listTrash()).length, 0);
+});
+
+test("migrateFromLegacyWebAggregate preserves trash and command log extras", async () => {
+  const repo = memoryRepository();
+  const legacy = {
+    ...structuredClone(webFixture),
+    trash: {
+      items: [
+        {
+          id: "trashed-1",
+          groupId: webFixture.groups[0].id,
+          kind: "note",
+          title: "Soft deleted",
+          content: "gone",
+          createdAt: "2026-07-01T00:00:00.000Z",
+          order: 9,
+        },
+      ],
+      tombstones: [
+        {
+          id: "tomb-1",
+          entityId: "trashed-1",
+          entityType: "item",
+          deletedAt: "2026-07-02T00:00:00.000Z",
+        },
+      ],
+    },
+    commandLog: [
+      {
+        commandId: "cmd-1",
+        type: "createItem",
+        appliedAt: "2026-07-02T00:00:00.000Z",
+        result: { ok: true },
+      },
+    ],
+  };
+
+  await repo.migrateFromLegacyWebAggregate(legacy);
+  const trash = await repo.listTrash();
+  assert.equal(trash.length, 1);
+  assert.equal(trash[0].entityId, "trashed-1");
+  assert.equal(trash[0].deletedAt, "2026-07-02T00:00:00.000Z");
+  const commandLog = await repo.getMeta("commandLog");
+  assert.equal(Array.isArray(commandLog) && commandLog.length, 1);
+});
+
+test("trashRecordsToBundle round-trips item snapshots", async () => {
+  const { trashRecordsToBundle, trashBundleToRecords } =
+    await import("../packages/local-store/index.js");
+  const repo = memoryRepository();
+  await repo.replaceFromExport(migrateWorkspaceExport(webFixture));
+  const item = (await repo.loadExport()).items[0];
+  await repo.trashItem(item.id, { deletedAt: "2026-07-28T12:00:00.000Z" });
+  const bundle = trashRecordsToBundle(await repo.listTrash());
+  assert.equal(bundle.items.length, 1);
+  assert.equal(bundle.tombstones.length, 1);
+  const records = trashBundleToRecords(bundle);
+  assert.equal(records[0].entityId, item.id);
+  assert.equal(records[0].snapshot.title, item.title);
+});
