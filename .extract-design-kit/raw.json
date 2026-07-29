@@ -1,0 +1,43 @@
+{
+  "source": {
+    "repository": "https://github.com/TheOrcDev/shadscan",
+    "commit": "3215eec857c1da63fd319d7048bfd50cf15f786a",
+    "license": "MIT"
+  },
+  "evidence": [
+    {
+      "category": "color",
+      "value": "--background: oklch(1 0 0); --foreground: oklch(0.145 0 0)",
+      "source_file": "app/globals.css",
+      "source_location": "15-48",
+      "component_or_selector": ":root",
+      "confidence": "verified"
+    },
+    {
+      "category": "shape",
+      "value": "rounded-none",
+      "source_file": "components/ui/button.tsx",
+      "source_location": "8",
+      "component_or_selector": "button",
+      "state": "base",
+      "confidence": "verified"
+    },
+    {
+      "category": "typography",
+      "value": "Nunito Sans, Outfit, Geist Mono",
+      "source_file": "app/layout.tsx",
+      "source_location": "3, 21-35",
+      "component_or_selector": "root layout",
+      "confidence": "verified"
+    },
+    {
+      "category": "motion",
+      "value": "100ms dialog fade/zoom",
+      "source_file": "components/ui/dialog.tsx",
+      "source_location": "40-62",
+      "component_or_selector": "dialog",
+      "state": "open/closed",
+      "confidence": "verified"
+    }
+  ]
+}

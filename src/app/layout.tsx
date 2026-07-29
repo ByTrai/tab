@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Fraunces, IBM_Plex_Sans } from "next/font/google";
+import { Geist_Mono, Nunito_Sans, Outfit } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -18,16 +18,21 @@ export const metadata: Metadata = {
   },
 };
 
-const fraunces = Fraunces({
+const nunito = Nunito_Sans({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-nunito",
   display: "swap",
 });
 
-const ibmPlexSans = IBM_Plex_Sans({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-ibm-plex",
+  variable: "--font-outfit",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -35,7 +40,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${ibmPlexSans.variable}`}>
+    <html lang="en" className={`${nunito.variable} ${outfit.variable} ${geistMono.variable}`}>
       <body>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>

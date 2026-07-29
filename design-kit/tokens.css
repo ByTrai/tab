@@ -1,0 +1,5 @@
+:root {
+  --dk-color-background: oklch(1 0 0); --dk-color-foreground: oklch(0.145 0 0); --dk-color-surface: oklch(1 0 0); --dk-color-subtle: oklch(0.97 0 0); --dk-color-muted: oklch(0.556 0 0); --dk-color-border: oklch(0.922 0 0); --dk-color-focus: oklch(0.708 0 0); --dk-color-danger: oklch(0.577 0.245 27.325);
+  --dk-font-body: Outfit, system-ui, sans-serif; --dk-font-heading: "Nunito Sans", system-ui, sans-serif; --dk-font-mono: "Geist Mono", ui-monospace, monospace;
+  --dk-radius: 0px; --dk-space-2: 0.5rem; --dk-space-3: 0.75rem; --dk-space-4: 1rem; --dk-space-6: 1.5rem; --dk-duration-fast: 100ms;
+}

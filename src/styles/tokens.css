@@ -1,79 +1,32 @@
 :root {
-  /* Brand direction: teal / ink / sand */
-  --ink: #14212b;
-  --ink-soft: #243442;
-  --teal: #0f766e;
-  --teal-bright: #14b8a6;
-  --teal-deep: #0b4f4a;
-  --sand: #e8dfd0;
-  --sand-warm: #f3ebe0;
-  --sand-deep: #c4b39a;
-  --paper: #f7f3ec;
-  --foam: #fbfaf7;
+  /* Technical monochrome direction, derived from design-kit/tokens.css. */
+  --ink: oklch(0.145 0 0);
+  --ink-soft: oklch(0.269 0 0);
+  --teal: oklch(0.205 0 0);
+  --teal-bright: oklch(0.488 0.243 264.376);
+  --teal-deep: oklch(0.145 0 0);
+  --sand: oklch(0.922 0 0);
+  --sand-warm: oklch(0.97 0 0);
+  --sand-deep: oklch(0.708 0 0);
+  --paper: oklch(1 0 0);
+  --foam: oklch(0.985 0 0);
   --line: color-mix(in oklab, var(--ink) 12%, transparent);
   --muted: color-mix(in oklab, var(--ink) 58%, white);
-  --danger: #9f1239;
-  --ok: #3f6f56;
+  --danger: oklch(0.577 0.245 27.325);
+  --ok: oklch(0.439 0 0);
   --shadow: color-mix(in oklab, var(--ink) 18%, transparent);
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-body: var(--font-ibm-plex), "IBM Plex Sans", system-ui, sans-serif;
-  --radius: 12px;
+  --font-display: var(--font-nunito), system-ui, sans-serif;
+  --font-body: var(--font-outfit), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --radius: 0px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  color: var(--ink);
-  background: var(--paper);
-  font-family: var(--font-body);
-  text-rendering: optimizeLegibility;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-a {
-  color: inherit;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.skip-link {
-  position: absolute;
-  left: 1rem;
-  top: -3rem;
-  z-index: 50;
-  padding: 0.6rem 0.9rem;
-  background: var(--ink);
-  color: var(--foam);
-  border-radius: 8px;
-}
-
-.skip-link:focus {
-  top: 1rem;
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--font-body); text-rendering: optimizeLegibility; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.skip-link { position: absolute; left: 1rem; top: -3rem; z-index: 50; padding: .6rem .9rem; background: var(--ink); color: var(--foam); border-radius: 0; }
+.skip-link:focus { top: 1rem; }

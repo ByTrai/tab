@@ -1194,3 +1194,43 @@
     transition: none !important;
   }
 }
+
+
+/* Technical, squared interaction layer: an original application of design-kit/. */
+.app-shell { --bg: var(--paper); --panel: var(--paper); --text: var(--ink); --muted: color-mix(in oklab, var(--ink) 56%, white); --accent: var(--ink); --soft: var(--sand-warm); background: var(--bg); }
+.app-shell.dark { --bg: oklch(0.145 0 0); --panel: oklch(0.205 0 0); --line: oklch(1 0 0 / 10%); --text: oklch(0.985 0 0); --muted: oklch(0.708 0 0); --accent: oklch(0.922 0 0); --soft: oklch(0.269 0 0); }
+.sidebar, .topbar, .quick-add, .group, .settings-popover, .dialog, .search, .secondary, .destination select, .mobile-workspace select, .dialog input, .item-card, .group-empty { border-radius: 0; }
+.brand, .page-heading h1, .dialog h2, .empty-state h2, .landing-brand, .landing-hero h1, .landing-section h2, .landing-steps strong, .landing-feature-list strong { font-family: var(--font-display); font-weight: 650; }
+.brand-mark, .landing-logo-mark { border-radius: 0; background: var(--ink); }
+.brand { font-size: 18px; letter-spacing: -0.03em; }
+.eyebrow, .landing-kicker, .local-pill, .group header small { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+.local-pill { border-radius: 0; background: var(--soft); color: var(--text); }
+.workspace, .add-workspace, .sidebar-bottom button, .sidebar-home { border-radius: 0; }
+.workspace:hover, .workspace.active { background: var(--soft); box-shadow: inset 2px 0 var(--accent); }
+.search { border-width: 0 0 1px; background: transparent; }
+.secondary, .add-row > button, .empty-state button, .settings-popover button, .dialog-actions > button:not(.secondary) { border-radius: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; }
+.secondary { background: transparent; }
+.kind-tabs button { border-radius: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; }
+.quick-add, .group { box-shadow: none; }
+.group > header, .item-card, .item-icon, .item-icon.task button, .group-empty { border-radius: 0; }
+.item-card { min-height: 72px; }
+.item-icon, .item-icon.note, .item-icon.task { background: var(--soft); color: var(--text); }
+.settings-popover, .dialog { box-shadow: 8px 8px 0 color-mix(in oklab, var(--ink) 12%, transparent); }
+.dialog-backdrop { background: color-mix(in oklab, var(--ink) 20%, transparent); backdrop-filter: blur(2px); }
+.landing { background: var(--paper); }
+.landing-nav { background: color-mix(in oklab, var(--paper) 92%, transparent); }
+.landing-nav-cta, .landing-btn, .hero-mock-pill, .hero-tab, .hero-tab-dot { border-radius: 0; }
+.landing-nav-cta { background: var(--ink); }
+.landing-hero { color: var(--foam); background: var(--ink); }
+.hero-atmosphere { background: linear-gradient(135deg, oklch(0.145 0 0), oklch(0.269 0 0)); animation: none; }
+.landing-brand { color: var(--foam); letter-spacing: -0.06em; }
+.landing-support { color: oklch(0.8 0 0); }
+.landing-hero .landing-btn.primary { background: var(--foam); color: var(--ink); }
+.landing-hero .landing-btn.ghost { background: transparent; }
+.hero-mock-pill, .hero-tab { backdrop-filter: none; background: color-mix(in oklab, white 8%, transparent); }
+.landing-section { padding-top: 84px; padding-bottom: 84px; }
+.landing-section.tone-ink { background: var(--ink); }
+.landing-steps li { border-top-color: var(--ink); }
+.landing-steps li::before { font-family: var(--font-mono); color: var(--muted); }
+.landing-feature-list li, .landing-privacy-points li { border-top-style: solid; }
+.landing-footer { background: var(--paper); }
