@@ -112,7 +112,7 @@
 }
 
 .add-workspace {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   border-color: var(--border);
 }
 
@@ -134,7 +134,7 @@
 .sidebar-bottom {
   margin-top: auto;
   border-top: 1px solid var(--border);
-  padding-top: 12px;
+  padding-top: var(--space-3);
 }
 
 .content {
@@ -203,7 +203,7 @@
   display: flex;
   justify-content: space-between;
   align-items: end;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .page-heading .eyebrow {
@@ -322,7 +322,7 @@
 .add-row {
   display: flex;
   padding: 15px 18px;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: center;
 }
 
@@ -339,7 +339,6 @@
 .add-row input {
   flex: 1;
   border: 0;
-  outline: 0;
   color: var(--foreground);
   background: transparent;
   font-size: 13px;
@@ -390,7 +389,7 @@
 .group > header div {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .group h2 {
@@ -505,7 +504,7 @@
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   color: var(--muted);
-  padding: 24px;
+  padding: var(--space-6);
   text-align: center;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -521,7 +520,6 @@
   border-radius: var(--radius);
   padding: 18px;
   background: var(--surface);
-  box-shadow: 6px 6px 0 var(--shadow);
 }
 
 .settings-popover p {
@@ -532,14 +530,14 @@
 
 .settings-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .trash-panel {
   margin-top: 16px;
   border-top: 1px solid var(--border);
-  padding-top: 12px;
+  padding-top: var(--space-3);
 }
 
 .trash-panel .eyebrow {
@@ -557,14 +555,14 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .trash-panel li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   font-size: 12px;
 }
 
@@ -602,7 +600,7 @@
   background: color-mix(in oklab, var(--ink) 45%, transparent);
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: var(--space-6);
   animation: fade-in var(--duration-fast) var(--ease-out) both;
 }
 
@@ -612,8 +610,7 @@
   color: var(--foreground);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  padding: 22px;
-  box-shadow: 8px 8px 0 var(--shadow);
+  padding: var(--space-6);
   animation: dialog-in var(--duration-fast) var(--ease-out) both;
 }
 
@@ -632,7 +629,7 @@
 
 .dialog input {
   width: 100%;
-  margin-top: 8px;
+  margin-top: var(--space-2);
   border: 0;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
@@ -649,7 +646,7 @@
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 18px;
 }
 
@@ -697,7 +694,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .landing-logo {
@@ -762,8 +759,8 @@
 .landing-hero {
   position: relative;
   min-height: calc(100svh - 64px);
-  color: var(--on-ink);
-  background: var(--ink);
+  color: var(--band-on-surface);
+  background: var(--band-surface);
   border-bottom: 1px solid var(--border);
 }
 
@@ -787,7 +784,7 @@
   font-size: clamp(2.6rem, 7vw, 4.5rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
-  color: var(--on-ink);
+  color: var(--band-on-surface);
 }
 
 .landing-hero h1 {
@@ -803,7 +800,7 @@
 .landing-support {
   margin: 0 0 26px;
   max-width: 38ch;
-  color: color-mix(in oklab, var(--on-ink) 72%, transparent);
+  color: color-mix(in oklab, var(--band-on-surface) 72%, transparent);
   font-size: 1rem;
   line-height: 1.55;
 }
@@ -811,7 +808,7 @@
 .landing-cta-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .landing-btn {
@@ -831,27 +828,27 @@
 }
 
 .landing-hero .landing-btn.primary {
-  background: var(--on-ink);
-  color: var(--ink);
+  background: var(--band-on-surface);
+  color: var(--band-surface);
 }
 
 .landing-hero .landing-btn.primary:hover {
-  background: color-mix(in oklab, var(--on-ink) 85%, transparent);
+  background: color-mix(in oklab, var(--band-on-surface) 85%, transparent);
 }
 
 .landing-hero .landing-btn.ghost {
-  border-color: color-mix(in oklab, var(--on-ink) 30%, transparent);
+  border-color: color-mix(in oklab, var(--band-on-surface) 30%, transparent);
   background: transparent;
-  color: var(--on-ink);
+  color: var(--band-on-surface);
 }
 
 .landing-hero .landing-btn.ghost:hover {
-  background: color-mix(in oklab, var(--on-ink) 10%, transparent);
+  background: color-mix(in oklab, var(--band-on-surface) 10%, transparent);
 }
 
 .landing-btn.primary {
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--band-surface);
+  color: var(--band-on-surface);
 }
 
 .landing-btn.ghost {
@@ -875,32 +872,32 @@
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 18px;
-  color: var(--on-ink);
-  border: 1px solid color-mix(in oklab, var(--on-ink) 20%, transparent);
+  color: var(--band-on-surface);
+  border: 1px solid color-mix(in oklab, var(--band-on-surface) 20%, transparent);
   padding: 18px;
 }
 
 .hero-mock-rail {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
 }
 
 .hero-mock-pill {
-  border: 1px solid color-mix(in oklab, var(--on-ink) 24%, transparent);
+  border: 1px solid color-mix(in oklab, var(--band-on-surface) 24%, transparent);
   border-radius: var(--radius);
   padding: 0.3rem 0.65rem;
   font-family: var(--font-mono);
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: color-mix(in oklab, var(--on-ink) 78%, transparent);
+  color: color-mix(in oklab, var(--band-on-surface) 78%, transparent);
 }
 
 .hero-mock-pill.active {
-  background: color-mix(in oklab, var(--on-ink) 14%, transparent);
-  color: var(--on-ink);
+  background: color-mix(in oklab, var(--band-on-surface) 14%, transparent);
+  color: var(--band-on-surface);
 }
 
 .hero-mock-board {
@@ -911,7 +908,7 @@
 
 .hero-tab {
   padding: 14px 16px;
-  border: 1px solid color-mix(in oklab, var(--on-ink) 20%, transparent);
+  border: 1px solid color-mix(in oklab, var(--band-on-surface) 20%, transparent);
   display: grid;
   gap: 4px;
 }
@@ -924,7 +921,7 @@
 .hero-tab small {
   font-family: var(--font-mono);
   font-size: 0.68rem;
-  color: color-mix(in oklab, var(--on-ink) 68%, transparent);
+  color: color-mix(in oklab, var(--band-on-surface) 68%, transparent);
 }
 
 .landing-section {
@@ -937,17 +934,17 @@
   max-width: none;
   margin: 0;
   padding: 84px 24px;
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--band-surface);
+  color: var(--band-on-surface);
 }
 
 .landing-section.tone-ink .landing-lede,
 .landing-section.tone-ink .landing-kicker {
-  color: color-mix(in oklab, var(--on-ink) 72%, transparent);
+  color: color-mix(in oklab, var(--band-on-surface) 72%, transparent);
 }
 
 .landing-section.tone-ink .landing-privacy-points li {
-  border-color: color-mix(in oklab, var(--on-ink) 20%, transparent);
+  border-color: color-mix(in oklab, var(--band-on-surface) 20%, transparent);
 }
 
 .landing-kicker {
@@ -989,10 +986,10 @@
 
 .landing-steps li {
   counter-increment: step;
-  padding-top: 8px;
+  padding-top: var(--space-2);
   border-top: 2px solid var(--ink);
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .landing-steps li::before {
@@ -1020,7 +1017,7 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .landing-privacy-points li,
@@ -1076,7 +1073,7 @@
 .landing-footer nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .landing-footer a {
@@ -1141,7 +1138,7 @@
 
   .sidebar-bottom {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
     border-top: 0;
     padding-top: 0;
   }

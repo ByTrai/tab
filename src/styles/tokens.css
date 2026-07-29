@@ -19,6 +19,12 @@
   --ink-soft: oklch(0.269 0 0);
   --on-ink: oklch(0.985 0 0);
 
+  /* Fixed (theme-independent) surface for the landing page's always-dark bands
+     (hero, privacy section) so they stay visually distinct even when the rest
+     of the marketing page follows the OS dark-mode preference. */
+  --band-surface: oklch(0.145 0 0);
+  --band-on-surface: oklch(0.985 0 0);
+
   --font-heading: var(--font-nunito), "Nunito Sans", system-ui, sans-serif;
   --font-body: var(--font-outfit), Outfit, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
@@ -63,6 +69,32 @@
   --shadow: color-mix(in oklab, black 45%, transparent);
 }
 
+/* The marketing page has no theme toggle; it follows the OS preference.
+   `body:has(.landing)` is included so the page background under/around the
+   `.landing` box (e.g. elastic overscroll) also switches, not just the box. */
+@media (prefers-color-scheme: dark) {
+  .landing,
+  body:has(.landing) {
+    color-scheme: dark;
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --surface: oklch(0.205 0 0);
+    --surface-raised: oklch(0.205 0 0);
+    --subtle: oklch(0.269 0 0);
+    --muted: oklch(0.708 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --border: oklch(1 0 0 / 12%);
+    --border-strong: oklch(1 0 0 / 24%);
+    --focus: oklch(0.708 0 0);
+    --danger: oklch(0.704 0.191 22.216);
+    --danger-subtle: oklch(0.269 0.03 22.216);
+    --ok: oklch(0.87 0 0);
+    --ink: oklch(0.985 0 0);
+    --ink-soft: oklch(0.87 0 0);
+    --on-ink: oklch(0.145 0 0);
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -91,6 +123,11 @@ button {
 
 a {
   color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .sr-only {

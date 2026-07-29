@@ -11,17 +11,41 @@
   --danger: #ac2b1a;
   --danger-subtle: #fbecea;
   --ink: #171717;
+  --ink-soft: #2e2e2e;
   --on-ink: #fafafa;
   --font-heading:
     "Nunito Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
   --font-body: Outfit, ui-sans-serif, system-ui, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
   --radius: 0px;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
   --duration-fast: 100ms;
   font-family: var(--font-body);
   color: var(--foreground);
   background: var(--background);
   min-height: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --background: #171717;
+    --foreground: #fafafa;
+    --surface: #202020;
+    --subtle: #2a2a2a;
+    --muted: #a1a1a1;
+    --border: #3a3a3a;
+    --border-strong: #545454;
+    --focus: #7a7a7a;
+    --danger: #e5877a;
+    --danger-subtle: #3a201d;
+    --ink: #fafafa;
+    --ink-soft: #d4d4d4;
+    --on-ink: #171717;
+  }
 }
 
 * {
@@ -128,7 +152,7 @@ header {
   margin: 32px auto 96px;
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
-  gap: 24px;
+  gap: var(--space-6);
   align-items: start;
 }
 
@@ -180,7 +204,7 @@ header {
 .organize-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .workspace-tree {
@@ -195,7 +219,7 @@ header {
 .workspace-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .workspace-title {
   margin: 0;
@@ -318,7 +342,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
@@ -418,7 +442,7 @@ h1 {
 }
 .actions button:hover:not(:disabled),
 .organize-actions .secondary:hover:not(:disabled) {
-  background: #000;
+  background: var(--ink-soft);
 }
 .actions button.secondary,
 button.secondary,
@@ -490,7 +514,6 @@ button.ghost.danger:hover:not(:disabled) {
   border-radius: var(--radius);
   padding: 13px 14px 13px 18px;
   border: 1px solid var(--ink);
-  box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 25%, transparent);
   display: flex;
   align-items: center;
   gap: 18px;
