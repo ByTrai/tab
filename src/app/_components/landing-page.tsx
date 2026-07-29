@@ -27,7 +27,6 @@ export function LandingPage() {
 
       <main id="main">
         <section className="landing-hero" aria-labelledby="hero-brand">
-          <div className="hero-atmosphere" aria-hidden="true" />
           <div className="landing-hero-inner">
             <div className="landing-hero-copy">
               <p id="hero-brand" className="landing-brand">
@@ -60,18 +59,15 @@ export function LandingPage() {
                   <span className="hero-mock-pill">Weekend reads</span>
                 </div>
                 <div className="hero-mock-board">
-                  <article className="hero-tab float-a">
-                    <span className="hero-tab-dot teal" />
+                  <article className="hero-tab">
                     <strong>Capture stack</strong>
                     <small>8 tabs parked</small>
                   </article>
-                  <article className="hero-tab float-b">
-                    <span className="hero-tab-dot sand" />
+                  <article className="hero-tab">
                     <strong>Notes for Monday</strong>
                     <small>Local draft</small>
                   </article>
-                  <article className="hero-tab float-c">
-                    <span className="hero-tab-dot ink" />
+                  <article className="hero-tab">
                     <strong>Resume later</strong>
                     <small>Reopen when ready*</small>
                   </article>

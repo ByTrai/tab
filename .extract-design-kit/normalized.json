@@ -2,53 +2,39 @@
   "tokens": {
     "background": {
       "value": "oklch(1 0 0)",
-      "source_refs": [
-        "raw.evidence[0]"
-      ],
+      "source_refs": ["raw.evidence[0]"],
       "confidence": "verified"
     },
     "foreground": {
       "value": "oklch(0.145 0 0)",
-      "source_refs": [
-        "raw.evidence[0]"
-      ],
+      "source_refs": ["raw.evidence[0]"],
       "confidence": "verified"
     },
     "radius": {
       "value": "0px",
-      "source_refs": [
-        "raw.evidence[1]"
-      ],
+      "source_refs": ["raw.evidence[1]"],
       "confidence": "verified"
     },
     "typography": {
       "value": "Outfit / Nunito Sans / Geist Mono role stack",
-      "source_refs": [
-        "raw.evidence[2]"
-      ],
+      "source_refs": ["raw.evidence[2]"],
       "confidence": "verified"
     },
     "durationFast": {
       "value": "100ms",
-      "source_refs": [
-        "raw.evidence[3]"
-      ],
+      "source_refs": ["raw.evidence[3]"],
       "confidence": "verified"
     }
   },
   "rules": {
     "button": {
       "value": "square, uppercase, tracked labels; 28-44px sizes",
-      "source_refs": [
-        "raw.evidence[1]"
-      ],
+      "source_refs": ["raw.evidence[1]"],
       "confidence": "verified"
     },
     "surface": {
       "value": "thin neutral rule, low or no elevation",
-      "source_refs": [
-        "raw.evidence[0]"
-      ],
+      "source_refs": ["raw.evidence[0]"],
       "confidence": "inferred"
     }
   }

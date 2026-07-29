@@ -35,11 +35,11 @@ export function LatestPost() {
           placeholder="Title"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-full bg-white/10 px-4 py-2 text-white"
+          className="w-full rounded-none border border-white/20 bg-transparent px-4 py-2 text-white"
         />
         <button
           type="submit"
-          className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
+          className="rounded-none bg-white/10 px-10 py-3 font-semibold tracking-wide uppercase transition hover:bg-white/20"
           disabled={createPost.isPending}
         >
           {createPost.isPending ? "Submitting..." : "Submit"}
