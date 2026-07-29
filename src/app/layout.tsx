@@ -40,7 +40,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${nunito.variable} ${outfit.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${nunito.variable} ${outfit.variable} ${geistMono.variable}`}
+    >
       <body>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>

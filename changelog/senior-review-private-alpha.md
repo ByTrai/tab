@@ -13,21 +13,21 @@ Reviewed Tabby against the TabExtend-like local-first private-alpha goal (save �
 
 ## 2. Findings and status
 
-| Area          | Finding                                                             | Status                                                                                           |
-| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Security      | better-auth + drizzle-orm GHSA set from Dependabot                  | **Fixed** (upgrade)                                                                              |
-| Security      | Email/password + hardcoded OAuth redirect                           | **Fixed**                                                                                        |
-| Security      | Legacy capture URLs re-opened without re-validation                 | **Fixed** in extension open/restore/undo paths                                                   |
-| Security      | Soft-delete vs immediate hard delete on web                         | **Fixed** (trash + restore)                                                                      |
-| Security      | Missing private disclosure channel                                  | **Fixed** (`SECURITY.md`)                                                                        |
+| Area          | Finding                                                             | Status                                                                                                    |
+| ------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Security      | better-auth + drizzle-orm GHSA set from Dependabot                  | **Fixed** (upgrade)                                                                                       |
+| Security      | Email/password + hardcoded OAuth redirect                           | **Fixed**                                                                                                 |
+| Security      | Legacy capture URLs re-opened without re-validation                 | **Fixed** in extension open/restore/undo paths                                                            |
+| Security      | Soft-delete vs immediate hard delete on web                         | **Fixed** (trash + restore)                                                                               |
+| Security      | Missing private disclosure channel                                  | **Fixed** (`SECURITY.md`)                                                                                 |
 | Security      | Transitive `sharp` (Next) / `esbuild` (drizzle-kit via better-auth) | **Fixed** — `sharp@0.35.3` override; stub unused `@esbuild-kit/esm-loader` (`npm audit --omit=dev` clean) |
-| Perf          | Whole-aggregate IDB writes on web                                   | **Mitigated path** — entity store package ready; web still flat document until full T2.1 cutover |
-| Perf          | Web search nested finds                                             | **Fixed** (Maps)                                                                                 |
-| Perf          | Extension capture journal still whole-state put                     | **Open** — entity store used for organize; journal migration remaining                           |
-| Best practice | Fake ⌘K / avatar / drag affordances                                 | **Removed** on web                                                                               |
-| Best practice | Manifest still `tabs` only                                          | **Preserved**                                                                                    |
-| Best practice | Plasmo parallel shell (T4.1)                                        | **Deferred** — build-free extension enhanced for testability first                               |
-| Best practice | No E2E in CI / no 1k–50k perf matrix                                | **Open** (T9.2)                                                                                  |
+| Perf          | Whole-aggregate IDB writes on web                                   | **Mitigated path** — entity store package ready; web still flat document until full T2.1 cutover          |
+| Perf          | Web search nested finds                                             | **Fixed** (Maps)                                                                                          |
+| Perf          | Extension capture journal still whole-state put                     | **Open** — entity store used for organize; journal migration remaining                                    |
+| Best practice | Fake ⌘K / avatar / drag affordances                                 | **Removed** on web                                                                                        |
+| Best practice | Manifest still `tabs` only                                          | **Preserved**                                                                                             |
+| Best practice | Plasmo parallel shell (T4.1)                                        | **Deferred** — build-free extension enhanced for testability first                                        |
+| Best practice | No E2E in CI / no 1k–50k perf matrix                                | **Open** (T9.2)                                                                                           |
 
 ## 3. Testing & validation
 
