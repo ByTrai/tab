@@ -235,7 +235,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T4.3 — Search, notes, import, and quick surfaces
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done` (notes + autosave status, tasks toggle, import dry-run/export on new-tab; context-menu/popup/side-panel still deferred)
 **Touch set:** extension feature surfaces
 **Depends on:** T2.2, T3.2, T4.2
 
@@ -344,7 +344,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T7.3 — Public developer and user docs
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `in-progress` (backup/recovery guide added; full contributor timing drills + architecture diagrams still open)
 **Touch set:** `README.md`, `docs/**`, future docs site
 **Depends on:** T0.1 for final contribution/security details
 

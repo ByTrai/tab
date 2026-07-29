@@ -27,7 +27,7 @@
           <input
             id="search"
             type="search"
-            placeholder="Search titles or URLs"
+            placeholder="Search titles, notes, or URLs"
             autocomplete="off"
           />
         </label>
@@ -35,6 +35,7 @@
         <div class="organize-toolbar">
           <button type="button" id="new-workspace" class="ghost">New workspace</button>
           <button type="button" id="new-group" class="ghost">New group</button>
+          <button type="button" id="new-note" class="ghost">New note</button>
         </div>
 
         <div id="workspaces" class="workspace-tree" aria-live="polite"></div>
@@ -46,6 +47,15 @@
           <button type="button" id="trash-selected" class="ghost danger" disabled>
             Move to trash
           </button>
+        </div>
+
+        <div class="backup-actions">
+          <button type="button" id="export-workspace" class="ghost">Export backup</button>
+          <label class="ghost file-button">
+            Import backup
+            <input id="import-workspace" type="file" accept="application/json,.json" hidden />
+          </label>
+          <p id="save-hint" class="save-hint" aria-live="polite"></p>
         </div>
       </aside>
 

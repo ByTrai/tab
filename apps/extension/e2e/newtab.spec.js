@@ -4,6 +4,7 @@ import path from "node:path";
 async function launchExtension() {
   const extensionPath = path.resolve("apps/extension");
   const context = await chromium.launchPersistentContext("", {
+    channel: "chromium",
     headless: false,
     args: [
       `--disable-extensions-except=${extensionPath}`,
@@ -35,7 +36,8 @@ test("captures an ordinary tab while preserving a pinned tab", async () => {
   ).toBeVisible();
   await expect(dashboard.locator(".tab-row")).not.toHaveCount(0);
   await dashboard.getByRole("button", { name: "Save & close" }).click();
-  await expect(dashboard.getByRole("status")).toContainText(/saved|Saved/i);
+  await expect(dashboard.locator("#toast")).toBeVisible();
+  await expect(dashboard.locator("#status")).toContainText(/saved/i);
   const remaining = await worker.evaluate(() =>
     chrome.tabs.query({ currentWindow: true }),
   );

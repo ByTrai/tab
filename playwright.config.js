@@ -1,8 +1,9 @@
 import { defineConfig } from "@playwright/test";
 
 /**
- * Loaded-extension scenarios need a headed Chromium with --load-extension.
- * CI runs these under xvfb-run (see .github/workflows/quality.yml).
+ * Loaded-extension scenarios need headed Chromium with --load-extension.
+ * Prefer Playwright's bundled Chromium — stable Chrome removed these flags.
+ * CI runs under xvfb-run (see .github/workflows/quality.yml).
  */
 export default defineConfig({
   testDir: "apps/extension/e2e",
@@ -13,5 +14,6 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   use: {
     trace: "on-first-retry",
+    channel: "chromium",
   },
 });
