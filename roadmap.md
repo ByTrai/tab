@@ -1,7 +1,7 @@
 # Tabby Remaining Work Roadmap
 
 > **Status:** execution plan after the local web alpha, safe-capture extension spike, and shared-contract foundation
-> **Last updated:** 2026-07-28
+> **Last updated:** 2026-07-29
 > **Team model:** two developers working in parallel, each assisted by AI
 > **Reference:** TabExtend is workflow inspiration only; use original code, design, copy, and assets
 
@@ -78,7 +78,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T0.1 — Decide identity and legal foundation
 
 **Owner:** `@tommy`
-**Status:** `in-progress` (SECURITY.md + issue/PR templates added; trademark/DCO decisions remain)
+**Status:** `done` (name remains Tabby pending formal trademark clearance before public store listing; DCO required via CONTRIBUTING — no separate CLA)
 **Touch set:** root legal/community files, `docs/product-review/**`
 **Depends on:** none
 
@@ -86,7 +86,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 
 - Confirm project name after trademark, package, repository, and domain checks.
 - MIT license selected and added; confirm copyright attribution with the project owner before the first public release.
-- `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` added. `SECURITY.md` and GitHub issue/PR templates added; support boundaries and the DCO/CLA decision remain.
+- `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` added. `SECURITY.md` and GitHub issue/PR templates added; DCO required for contributions (see CONTRIBUTING).
 - Define maintainer roles, issue/PR templates, decision process, and release ownership.
 - Record product terminology so web, extension, landing page, and store listing do not drift.
 
@@ -144,7 +144,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T2.1 — Indexed entity repository
 
 **Owner:** `unassigned`
-**Status:** `in-progress` (`@tabby/local-store` shipped; web IDB cutover remaining)
+**Status:** `done` (web cut over to `@tabby/local-store` EntityRepository with legacy `tabby-workspace` migration + pre-migration backup download)
 **Touch set:** local-store package/repositories, migration fixtures
 **Depends on:** T1.1, T1.2
 
@@ -159,7 +159,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T2.2 — Import, export, trash, and recovery
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done` (dry-run `previewWorkspaceImport`; 30-day trash retention purge; atomic replace clears trash)
 **Touch set:** import/export and recovery services, fixtures
 **Depends on:** T2.1
 
@@ -235,7 +235,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T4.3 — Search, notes, import, and quick surfaces
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `ready`
 **Touch set:** extension feature surfaces
 **Depends on:** T2.2, T3.2, T4.2
 
@@ -252,7 +252,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T5.1 — Original shared design language
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done` (monochrome technical design kit applied across landing, `/app`, and extension)
 **Touch set:** design tokens/shared primitives and design docs
 **Depends on:** T0.1 identity
 
@@ -281,7 +281,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T6.1 — Adopt common commands and storage
 
 **Owner:** `unassigned`
-**Status:** `done` (commands + trash/export v2 on web; entity-store cutover still with T2.1)
+**Status:** `done`
 **Touch set:** `src/app/_components/**`, `src/lib/**`, web adapter tests
 **Depends on:** T1.2, T2.1, T5.1
 
@@ -415,7 +415,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T9.2 — Recovery, browser E2E, and performance matrix
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `in-progress` (Playwright extension E2E + recover message in CI via xvfb; 1k-item bench script recorded; 10k/50k + full interruption matrix still open)
 **Touch set:** shared fixtures, E2E, performance/recovery harness
 **Depends on:** T2.1, T3.1, T4.1
 
@@ -484,11 +484,11 @@ A card is complete only when:
 ## 16. Current assignment
 
 ```md
-T1.1 — Canonical local workspace model
-Owner: @tommy
+T9.2 — Recovery, browser E2E, and performance matrix
+Owner: unassigned
 Status: in-progress
-Touch set: shared contracts/domain package, contract tests, ADR
-Blocked completion check: registry-backed install, typecheck, and production build
+Touch set: shared fixtures, E2E, performance/recovery harness
+Next: expand interruption matrix + 10k/50k benches; keep T4.1 Plasmo deferred; do not start T8 sync
 ```
 
-T9.1 was completed by `@tommy`. Claim the next ready card only after T1.1 is completed or explicitly parked, following the one-active-card rule.
+Claim the next ready card only after finishing or parking the active card, following the one-active-card rule. Ready/unblocked after this pass: T0.2, T4.1, T4.3 (unblocked by T2.2), T5.2, T7.1, T7.3. Hosted sync (T8) remains blocked until Gate C.

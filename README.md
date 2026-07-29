@@ -28,7 +28,7 @@ Both clients work locally without an account. Synchronization, collaboration, an
 - Undo captures using a local IndexedDB journal.
 - Request only the `tabs` permission; no content scripts or host permissions are used.
 
-The web and extension share dependency-free workspace contracts and URL safety rules. They do **not** yet share one database or present the same complete UI.
+The web and extension share dependency-free workspace contracts, URL safety rules, and the `@tabby/local-store` indexed entity repository. Capture still uses a separate extension journal database. Sync is intentionally deferred.
 
 ## Prerequisites
 
@@ -115,8 +115,8 @@ Prefer committed migrations for changes intended to merge. Treat `db:push` as a 
 ├── src/
 │   ├── app/                        # Next.js App Router pages and route handlers
 │   │   └── _components/workspace-app.tsx # current client workspace shell
-│   ├── lib/workspace.ts            # web domain validation/search/starter data
-│   ├── lib/workspace-store.ts      # web IndexedDB persistence boundary
+│   ├── lib/workspace.ts            # web domain helpers and legacy snapshot adapters
+│   ├── lib/workspace-store.ts      # web EntityRepository adapter + legacy migration
 │   ├── server/                     # tRPC, auth, and Drizzle/Postgres code
 │   ├── styles/                     # global styles and Tailwind entry point
 │   └── trpc/                       # React/server tRPC integration

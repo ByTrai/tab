@@ -293,6 +293,51 @@ export function serializeWorkspaceExport(value) {
   return `${JSON.stringify(canonical, null, 2)}\n`;
 }
 
+/**
+ * Dry-run import preview. Validates the entire payload with migrateWorkspaceExport
+ * (fail-closed, no writes) and classifies creates vs updates against the current export.
+ *
+ * @param {unknown} payload
+ * @param {import("./index.js").WorkspaceExportV2 | null | undefined} [current]
+ * @returns {import("./index.js").WorkspaceImportPreview}
+ */
+export function previewWorkspaceImport(payload, current) {
+  const next = migrateWorkspaceExport(payload);
+  const currentState = current ?? {
+    schemaVersion: WORKSPACE_EXPORT_SCHEMA_VERSION,
+    workspaces: [],
+    groups: [],
+    items: [],
+  };
+  const classify = (incoming, existing) => {
+    const existingIds = new Set(existing.map((entry) => entry.id));
+    let creates = 0;
+    let updates = 0;
+    for (const entry of incoming) {
+      if (existingIds.has(entry.id)) updates += 1;
+      else creates += 1;
+    }
+    const incomingIds = new Set(incoming.map((entry) => entry.id));
+    const removes = existing.filter(
+      (entry) => !incomingIds.has(entry.id),
+    ).length;
+    return { creates, updates, removes, total: incoming.length };
+  };
+
+  const workspaces = classify(next.workspaces, currentState.workspaces);
+  const groups = classify(next.groups, currentState.groups);
+  const items = classify(next.items, currentState.items);
+
+  return {
+    schemaVersion: next.schemaVersion,
+    workspaces,
+    groups,
+    items,
+    canonical: next,
+    summary: `Replace local data with ${items.total} items in ${workspaces.total} workspaces (${items.creates} new, ${items.updates} updated, ${items.removes} removed). Trash will be cleared.`,
+  };
+}
+
 function boundedArray(value, maximum, name) {
   if (!Array.isArray(value))
     throw new Error(`Workspace ${name} must be an array.`);

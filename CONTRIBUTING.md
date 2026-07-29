@@ -35,14 +35,26 @@ Run the checks relevant to the files you changed:
 
 ```bash
 npm run format:check
+npm run lint
 npm run typecheck
 npm run test:extension
+npm run check:manifest
+npm run check:licenses
 npm run build
 ```
 
-The current `npm run lint` and `npm run check` scripts are known to rely on the obsolete `next lint` command. Roadmap card T9.1 tracks replacing them; do not describe them as passing until that work lands.
+Optional:
+
+```bash
+npm run bench:local-store
+npm run test:e2e:extension   # requires Playwright Chromium; use xvfb-run in CI
+```
 
 Tests should match risk. Persistence and browser changes need failure, retry, and worker-restart coverage. UI changes need keyboard, focus, reduced-motion, zoom, and error-state review. Use synthetic URLs and content in fixtures.
+
+## Developer Certificate of Origin
+
+Tabby uses the [Developer Certificate of Origin](https://developercertificate.org/) instead of a CLA. By contributing, you certify that you have the right to submit the work under the project's MIT license. Sign each commit with `Signed-off-by: Your Name <email@example.com>` (for example `git commit -s`).
 
 ## Document the handoff
 
@@ -69,4 +81,4 @@ Keep reviews respectful and address feedback with a follow-up commit or a clear 
 
 ## Security and conduct
 
-Do not publicly disclose an exploitable vulnerability or sensitive user data. Use the repository's private reporting channel until a dedicated `SECURITY.md` contact is published. All participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
+Do not publicly disclose an exploitable vulnerability or sensitive user data. Report privately via [SECURITY.md](SECURITY.md). All participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
