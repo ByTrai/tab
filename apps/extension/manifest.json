@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Tabby — Local Tab Workspace",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Safely save, organize, and restore tabs in a private, local workspace.",
   "permissions": ["tabs"],
+  "optional_permissions": ["contextMenus"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -12,6 +13,7 @@
     "newtab": "newtab.html"
   },
   "action": {
-    "default_title": "Open Tabby"
+    "default_title": "Capture with Tabby",
+    "default_popup": "popup.html"
   }
 }

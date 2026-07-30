@@ -241,11 +241,37 @@ export class CaptureService {
     for (const operation of operations) {
       if (operation.stage === "closing") {
         recovered.push(await this.recoverClosing(operation));
+      } else if (operation.stage === "saved" && operation.closeRequested) {
+        // Worker died after durable save but before/during the closing transition.
+        recovered.push(await this.resumeCloseAfterSaved(operation));
       } else if (operation.stage === "undoing") {
         recovered.push(await this.undo(operation.id));
       }
     }
     return recovered;
+  }
+
+  /**
+   * Resumes a capture that reached the no-loss `saved` boundary with
+   * closeRequested=true before the worker was suspended.
+   */
+  async resumeCloseAfterSaved(operation) {
+    const closableIds = (operation.items ?? [])
+      .filter((item) => !item.pinned)
+      .map((item) => item.tabId);
+    const closing = {
+      ...operation,
+      stage: "closing",
+      closedTabIds: closableIds,
+      failedCloseIds: [],
+    };
+    await this.repository.updateOperation(closing);
+    if (closableIds.length === 0) {
+      const closed = { ...closing, stage: "closed", closedTabIds: [] };
+      await this.repository.updateOperation(closed);
+      return closed;
+    }
+    return this.recoverClosing(closing);
   }
 
   async recoverClosing(operation) {
@@ -470,6 +496,50 @@ export class CaptureService {
       await this.entities.putGroup(group);
     }
     return { workspace, group };
+  }
+
+  /**
+   * Thin context-menu capture: page tab → journal capture; bare URL → inbox link.
+   * Never closes tabs from the context menu (explicit opt-in elsewhere).
+   */
+  async captureContextTarget({ commandId, url, title, tabId = null }) {
+    if (!commandId) throw new Error("A command id is required.");
+    const normalized = normalizeHttpUrl(url);
+    if (!normalized) {
+      throw new Error("Only http(s) links can be captured.");
+    }
+
+    if (Number.isInteger(tabId)) {
+      return this.capture({
+        commandId,
+        tabIds: [tabId],
+        close: false,
+        duplicatePolicy: "skip",
+      });
+    }
+
+    const inbox = await this.ensureDefaultInbox();
+    if (!inbox) {
+      throw new Error("Workspace organization store is unavailable.");
+    }
+
+    const existing = await this.entities.savedLinkItems();
+    const key = normalizedUrlKey(normalized);
+    if (existing.some((item) => normalizedUrlKey(item.url) === key)) {
+      return { skippedDuplicate: true, url: normalized };
+    }
+
+    const displayTitle =
+      (typeof title === "string" && title.trim()) ||
+      new URL(normalized).hostname;
+    return this.applyWorkspaceCommand({
+      type: "createItem",
+      commandId,
+      groupId: inbox.group.id,
+      kind: "link",
+      title: displayTitle,
+      url: normalized,
+    });
   }
 
   async syncCapturedLinks(items) {

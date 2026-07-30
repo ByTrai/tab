@@ -1,0 +1,39 @@
+{
+  "name": "@tabby/extension-plasmo",
+  "displayName": "Tabby (Plasmo spike)",
+  "version": "0.4.0",
+  "description": "Parallel Plasmo packaging shell for Tabby — not the production baseline.",
+  "private": true,
+  "scripts": {
+    "dev": "plasmo dev",
+    "build": "plasmo build",
+    "package": "plasmo package"
+  },
+  "dependencies": {
+    "plasmo": "0.90.5",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.1",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
+  },
+  "manifest": {
+    "permissions": [
+      "tabs"
+    ],
+    "optional_permissions": [
+      "contextMenus"
+    ],
+    "host_permissions": [],
+    "chrome_url_overrides": {
+      "newtab": "./newtab.html"
+    },
+    "action": {
+      "default_title": "Tabby"
+    }
+  }
+}

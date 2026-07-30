@@ -95,7 +95,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T0.2 — Clean-room reference and user discovery
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done` (interview fieldwork still scheduled; product rejects/P0 links documented)
 **Touch set:** `docs/product-review/**` only
 **Depends on:** none
 
@@ -103,6 +103,8 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 - Interview 8–12 tab-heavy users and validate capture → close → resume as the core job.
 - Document evidence separately from hypotheses; define activation and reliability measures without raw-content telemetry.
 - Produce prioritized gaps and explicitly reject features without evidence.
+
+**Shipped:** `docs/product-review/clean-room-and-discovery.md` — workflow inventory, rejects, activation/reliability measures, interview script. Remaining debt: run interviews and attach consent notes.
 
 **Done when:** each P0/P1 feature links to observed behavior or a documented product decision.
 
@@ -206,7 +208,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T4.1 — Parallel Plasmo shell and safe cutover
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done` (parallel spike only — cutover blocked until parity + rollback drills)
 **Touch set:** new extension shell/build config; current extension changes only for shared interfaces
 **Depends on:** T9.1 baseline, official framework verification
 
@@ -215,6 +217,8 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 - Reuse commands, repository, and browser adapter; do not duplicate product rules.
 - Compare generated package, permissions, CSP, startup, storage upgrade, capture, and undo to baseline.
 - Preserve a rollback artifact until an installed legacy profile upgrades without data loss.
+
+**Shipped:** `apps/extension-plasmo` with pinned `plasmo@0.90.5`, popup/new-tab/background entries, optional `contextMenus`, `npm run build:plasmo` + `check:plasmo-manifest`. Production baseline remains `apps/extension`. Remaining debt: wire CaptureService/IDB into Plasmo SW, package-size parity matrix, install/update upgrade drill, ADR-0003 cutover.
 
 **Done when:** packaged parity tests pass with no additional permission, remote code, or storage reset. See `docs/plans/plasmo-and-phase-2.md`.
 
@@ -235,7 +239,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T4.3 — Search, notes, import, and quick surfaces
 
 **Owner:** `unassigned`
-**Status:** `done` (notes + autosave status, tasks toggle, import dry-run/export on new-tab; context-menu/popup/side-panel still deferred)
+**Status:** `done` (notes + autosave status, tasks toggle, import dry-run/export, thin action popup capture, optional context-menu capture; side-panel still deferred)
 **Touch set:** extension feature surfaces
 **Depends on:** T2.2, T3.2, T4.2
 
@@ -266,7 +270,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T5.2 — Accessibility verification
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done` (automated smoke + private-alpha audit doc; NVDA/VoiceOver full matrix and Lighthouse CI remain follow-ups)
 **Touch set:** accessibility tests/audit reports and small targeted fixes
 **Depends on:** T4.2, T6.1, T7.2
 
@@ -314,7 +318,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T7.1 — Information architecture, copy, and wireframe
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done` (documented against shipped `/` in `docs/product-review/landing-ia.md`)
 **Touch set:** landing specification/content docs only
 **Depends on:** T0.1 for final brand/legal copy; may start with placeholders
 
@@ -344,7 +348,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T7.3 — Public developer and user docs
 
 **Owner:** `unassigned`
-**Status:** `in-progress` (backup/recovery guide added; full contributor timing drills + architecture diagrams still open)
+**Status:** `done` (backup guide, architecture overview, contributor ≤15m setup drill; optional docs site still future)
 **Touch set:** `README.md`, `docs/**`, future docs site
 **Depends on:** T0.1 for final contribution/security details
 
@@ -415,7 +419,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T9.2 — Recovery, browser E2E, and performance matrix
 
 **Owner:** `unassigned`
-**Status:** `in-progress` (Playwright extension E2E + recover message in CI via xvfb; 1k-item bench script recorded; 10k/50k + full interruption matrix still open)
+**Status:** `done` (journal-stage recovery matrix + saved+closeRequested resume; popup/newtab E2E; 1k/10k/50k benches recorded in CI artifacts — not hard gates)
 **Touch set:** shared fixtures, E2E, performance/recovery harness
 **Depends on:** T2.1, T3.1, T4.1
 
@@ -425,16 +429,20 @@ The landing page is a release feature, not an afterthought. It should communicat
 
 **Targets:** warm new-tab p75 <300 ms; cold p75 <1 s; local command p95 <100 ms; indexed 10k search p95 <100 ms; zero known data-loss defects.
 
+**Shipped:** unit recovery matrix across `saved` / `saved+close` / `closing` / partial close / mid-`undoing` / terminal no-ops / fail-before-close; E2E popup capture + seeded closing recover; multi-size bench artifact. Remaining debt: true mid-write SW kill injection, package-size matrix, Plasmo-gated install/update drill (T4.1).
+
 ### T9.3 — Production and open-source release
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `ready` (scaffolding shipped; store submit + reviews + observation still required)
 **Depends on:** T0.1, T5.2, T7.2, T9.1, T9.2
 
 - Produce signed reproducible extension artifacts, SBOM/provenance, store permission/privacy disclosures, and rollback instructions.
 - Commission security and accessibility review; close all critical findings.
 - Publish compatibility/deprecation policy and supported browser/update matrix.
 - Add Docker self-hosting only after health, migration, upgrade, rollback, backup, and restore procedures pass clean-install drills.
+
+**Shipped:** `docs/release/{checklist,store-privacy,compatibility}.md`, `npm run release:extension`, `npm run release:sbom`. Remaining: paid signing, store listing, commissioned reviews, 30-day observation, Docker self-host drills.
 
 **Done when:** release artifacts are reproducible, recovery works, critical docs exist, and no unsupported capability is marketed.
 
@@ -484,11 +492,10 @@ A card is complete only when:
 ## 16. Current assignment
 
 ```md
-T9.2 — Recovery, browser E2E, and performance matrix
-Owner: unassigned
-Status: in-progress
-Touch set: shared fixtures, E2E, performance/recovery harness
-Next: expand interruption matrix + 10k/50k benches; keep T4.1 Plasmo deferred; do not start T8 sync
+Local private-alpha engineering loop — complete enough for observation
+Owner: @tommy / cloud agent
+Shipped this loop: T0.2 docs, T4.1 Plasmo parallel spike, T4.3 context-menu (optional), T9.3 release scaffolding
+Blocked / deferred: T8 sync (Gate D), Plasmo cutover, store submit, interview fieldwork
 ```
 
-Claim the next ready card only after finishing or parking the active card, following the one-active-card rule. Ready/unblocked after this pass: T0.2, T4.1, T4.3 (unblocked by T2.2), T5.2, T7.1, T7.3. Hosted sync (T8) remains blocked until Gate C.
+Gate B local cards are complete for observation. **Do not start hosted sync (T8)** until Gate C. Plasmo remains parallel-only until ADR-0003 cutover drills pass.

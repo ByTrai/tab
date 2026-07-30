@@ -5,7 +5,7 @@ Tabby is an open-source, local-first workspace for links, notes, and lightweight
 - a Next.js web alpha for organizing workspaces, groups, links, and notes; and
 - a dependency-free Chromium Manifest V3 extension that inventories the current window and performs restart-safe tab capture.
 
-Both clients work locally without an account. Synchronization, collaboration, and hosted production infrastructure are intentionally deferred. See [`roadmap.md`](roadmap.md) for the remaining work, topic ownership, and delivery order. User backup steps live in [`docs/user-guide/backup-and-recovery.md`](docs/user-guide/backup-and-recovery.md).
+Both clients work locally without an account. Synchronization, collaboration, and hosted production infrastructure are intentionally deferred. See [`roadmap.md`](roadmap.md) for the remaining work, topic ownership, and delivery order. User backup steps live in [`docs/user-guide/backup-and-recovery.md`](docs/user-guide/backup-and-recovery.md). Architecture boundaries are summarized in [`docs/architecture/overview.md`](docs/architecture/overview.md). New contributors should follow [`docs/contributor-setup.md`](docs/contributor-setup.md).
 
 > **Alpha warning:** browser data is stored in IndexedDB and can be lost when site or extension storage is cleared. Export a JSON backup before testing destructive browser/profile operations.
 
@@ -22,10 +22,12 @@ Both clients work locally without an account. Synchronization, collaboration, an
 ### Chromium extension
 
 - Replace the new-tab page with a current-window tab inventory.
+- Use the toolbar popup for quick save / save-and-close without opening the full workspace.
 - Select ordinary HTTP(S) tabs while excluding pinned and restricted tabs by default.
 - Persist a capture operation before closing selected tabs.
-- Recover incomplete operations after a Manifest V3 worker restart.
+- Recover incomplete operations after a Manifest V3 worker restart (including `saved`+close and `closing` / `undoing` stages).
 - Undo captures using a local IndexedDB journal.
+- Organize links, notes, and tasks; export/import versioned JSON backups.
 - Request only the `tabs` permission; no content scripts or host permissions are used.
 
 The web and extension share dependency-free workspace contracts, URL safety rules, and the `@tabby/local-store` indexed entity repository. Capture still uses a separate extension journal database. Sync is intentionally deferred.

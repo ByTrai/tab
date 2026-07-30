@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "next build",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:extension && npm run test:roadmap-issues && npm run check:manifest && npm run check:licenses",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:extension && npm run test:roadmap-issues && npm run check:manifest && npm run check:plasmo-manifest && npm run check:licenses && npm run check:a11y",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -23,13 +23,19 @@
     "test:extension": "node --test apps/extension/test/*.test.js",
     "test:e2e": "playwright test",
     "test:e2e:extension": "playwright test apps/extension/e2e",
+    "check:a11y": "node --test scripts/check-a11y-smoke.mjs",
     "typecheck": "tsc --noEmit",
     "check:manifest": "node scripts/check-extension-manifest.mjs",
+    "check:plasmo-manifest": "node scripts/check-plasmo-manifest.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
     "audit:dependencies": "node scripts/audit-production.mjs",
     "roadmap:issues": "node scripts/create-roadmap-issues.mjs",
     "test:roadmap-issues": "node --test scripts/create-roadmap-issues.test.mjs",
-    "bench:local-store": "node scripts/bench-local-store.mjs"
+    "bench:local-store": "node scripts/bench-local-store.mjs",
+    "build:plasmo": "npm --prefix apps/extension-plasmo run build",
+    "install:plasmo": "npm --prefix apps/extension-plasmo install",
+    "release:extension": "node scripts/release-extension.mjs",
+    "release:sbom": "node scripts/release-sbom.mjs"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.12.0",

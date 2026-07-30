@@ -22,13 +22,22 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:extension
+      - run: npm run check:a11y
       - run: npm run check:manifest
+      - run: npm run check:plasmo-manifest
       - run: npm run check:licenses
       - run: npm run audit:dependencies
       - run: npm run build
         env:
           SKIP_ENV_VALIDATION: "1"
-      - run: npm run bench:local-store
+      - name: Local-store bench (1k/10k/50k, record only)
+        run: npm run bench:local-store
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench-local-store
+          path: artifacts/bench-local-store.json
+          if-no-files-found: warn
 
   extension-e2e:
     runs-on: ubuntu-latest

@@ -412,7 +412,12 @@ export function WorkspaceApp() {
           >
             ◐ <span>{theme === "light" ? "Dark" : "Light"} theme</span>
           </button>
-          <button type="button" onClick={() => setMenuOpen(!menuOpen)}>
+          <button
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="settings-popover"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
             ⚙ <span>Data & settings</span>
           </button>
           <Link className="sidebar-home" href="/">
@@ -437,9 +442,13 @@ export function WorkspaceApp() {
 
         {menuOpen && (
           <div
+            id="settings-popover"
             className="settings-popover"
             role="dialog"
             aria-label="Data and settings"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setMenuOpen(false);
+            }}
           >
             <strong>Your data stays yours</strong>
             <p>
@@ -508,12 +517,13 @@ export function WorkspaceApp() {
         ) : (
           <>
             <section className="quick-add" aria-label="Quick add">
-              <div className="kind-tabs">
+              <div className="kind-tabs" role="group" aria-label="Item kind">
                 {(["link", "note", "task"] as const).map((value) => (
                   <button
                     key={value}
                     type="button"
                     className={kind === value ? "selected" : ""}
+                    aria-pressed={kind === value}
                     onClick={() => setKind(value)}
                   >
                     {value === "link" ? "↗" : value === "note" ? "▤" : "✓"}{" "}
@@ -610,7 +620,16 @@ export function WorkspaceApp() {
       </section>
 
       {dialog && (
-        <div className="dialog-backdrop" role="presentation">
+        <div
+          className="dialog-backdrop"
+          role="presentation"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setDialog(null);
+              setPendingImport(null);
+            }
+          }}
+        >
           <div
             className="dialog"
             role="dialog"

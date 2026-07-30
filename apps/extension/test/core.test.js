@@ -372,3 +372,66 @@ test("FakeBrowser capabilities advertise tabs-only Phase 1 surface", () => {
     sidePanel: false,
   });
 });
+
+test("captureContextTarget saves an active page tab without closing", async () => {
+  const browser = new FakeBrowser(tabs);
+  const repository = new FakeRepository();
+  const entities = memoryRepository();
+  const result = await service(
+    browser,
+    repository,
+    entities,
+  ).captureContextTarget({
+    commandId: "ctx-page",
+    url: "https://example.com/a#section",
+    title: "Example",
+    tabId: 1,
+  });
+  assert.equal(result.stage, "saved");
+  assert.equal(result.closeRequested, false);
+  assert.equal(browser.tabs.length, 3);
+  const all = await entities.getAll();
+  assert.equal(all.items.length, 1);
+});
+
+test("captureContextTarget creates an inbox link for a bare URL", async () => {
+  const browser = new FakeBrowser(tabs);
+  const repository = new FakeRepository();
+  const entities = memoryRepository();
+  const result = await service(
+    browser,
+    repository,
+    entities,
+  ).captureContextTarget({
+    commandId: "ctx-link",
+    url: "https://docs.example/path",
+    title: "Docs",
+    tabId: null,
+  });
+  assert.equal(result.result.item.kind, "link");
+  assert.equal(result.result.item.url, "https://docs.example/path");
+  const again = await service(
+    browser,
+    repository,
+    entities,
+  ).captureContextTarget({
+    commandId: "ctx-link-dup",
+    url: "https://docs.example/path",
+    title: "Docs",
+  });
+  assert.equal(again.skippedDuplicate, true);
+});
+
+test("captureContextTarget rejects non-http URLs", async () => {
+  const browser = new FakeBrowser(tabs);
+  const repository = new FakeRepository();
+  await assert.rejects(
+    () =>
+      service(browser, repository, memoryRepository()).captureContextTarget({
+        commandId: "ctx-bad",
+        url: "chrome://settings",
+        title: "Settings",
+      }),
+    /http\(s\)/,
+  );
+});
