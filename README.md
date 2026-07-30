@@ -22,10 +22,12 @@ Both clients work locally without an account. Synchronization, collaboration, an
 ### Chromium extension
 
 - Replace the new-tab page with a current-window tab inventory.
+- Use the toolbar popup for quick save / save-and-close without opening the full workspace.
 - Select ordinary HTTP(S) tabs while excluding pinned and restricted tabs by default.
 - Persist a capture operation before closing selected tabs.
-- Recover incomplete operations after a Manifest V3 worker restart.
+- Recover incomplete operations after a Manifest V3 worker restart (including `saved`+close and `closing` / `undoing` stages).
 - Undo captures using a local IndexedDB journal.
+- Organize links, notes, and tasks; export/import versioned JSON backups.
 - Request only the `tabs` permission; no content scripts or host permissions are used.
 
 The web and extension share dependency-free workspace contracts, URL safety rules, and the `@tabby/local-store` indexed entity repository. Capture still uses a separate extension journal database. Sync is intentionally deferred.

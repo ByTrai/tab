@@ -28,7 +28,14 @@ jobs:
       - run: npm run build
         env:
           SKIP_ENV_VALIDATION: "1"
-      - run: npm run bench:local-store
+      - name: Local-store bench (1k/10k/50k, record only)
+        run: npm run bench:local-store
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench-local-store
+          path: artifacts/bench-local-store.json
+          if-no-files-found: warn
 
   extension-e2e:
     runs-on: ubuntu-latest

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tabby capture</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand" aria-label="Tabby">
+        <span aria-hidden="true">t</span>
+        <strong>tabby</strong>
+      </div>
+      <a id="open-workspace" href="newtab.html" target="_blank" rel="noreferrer"
+        >Workspace</a
+      >
+    </header>
+
+    <main>
+      <p class="lede">Save tabs from this window. Data stays on this device.</p>
+      <div class="panel-head">
+        <span id="count">Loading…</span>
+        <label class="select-all">
+          <input type="checkbox" id="select-all" />
+          Select capturable
+        </label>
+      </div>
+      <div id="tabs" aria-live="polite"></div>
+      <div class="actions">
+        <span id="status" role="status">Reading this window…</span>
+        <button type="button" id="save" class="secondary" disabled>Save</button>
+        <button type="button" id="save-close" disabled>Save &amp; close</button>
+      </div>
+    </main>
+
+    <div id="toast" class="toast" hidden>
+      <span id="toast-copy"></span>
+      <button type="button" id="undo">Undo</button>
+    </div>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

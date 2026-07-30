@@ -66,10 +66,27 @@ export class FakeBrowser {
 }
 
 export class FakeRepository {
-  constructor({ failCommit = false } = {}) {
+  /**
+   * @param {{
+   *   failCommit?: boolean;
+   *   failUpdateOnStage?: string | null;
+   *   failUpdateAfterN?: number | null;
+   *   failRemove?: boolean;
+   * }} [options]
+   */
+  constructor({
+    failCommit = false,
+    failUpdateOnStage = null,
+    failUpdateAfterN = null,
+    failRemove = false,
+  } = {}) {
     this.items = [];
     this.journal = [];
     this.failCommit = failCommit;
+    this.failUpdateOnStage = failUpdateOnStage;
+    this.failUpdateAfterN = failUpdateAfterN;
+    this.failRemove = failRemove;
+    this.updateCalls = 0;
   }
   async savedItems() {
     return structuredClone(this.items);
@@ -87,11 +104,24 @@ export class FakeRepository {
     this.journal.push(structuredClone(operation));
   }
   async updateOperation(operation) {
+    this.updateCalls += 1;
+    if (this.failUpdateOnStage && operation.stage === this.failUpdateOnStage) {
+      throw new Error(
+        `Injected update failure at stage ${this.failUpdateOnStage}`,
+      );
+    }
+    if (
+      this.failUpdateAfterN !== null &&
+      this.updateCalls > this.failUpdateAfterN
+    ) {
+      throw new Error("Injected update failure after N calls");
+    }
     this.journal = this.journal.map((entry) =>
       entry.id === operation.id ? structuredClone(operation) : entry,
     );
   }
   async removeItems(ids) {
+    if (this.failRemove) throw new Error("Injected remove failure");
     this.items = this.items.filter(({ id }) => !ids.includes(id));
   }
 }

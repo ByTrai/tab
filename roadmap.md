@@ -235,7 +235,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T4.3 — Search, notes, import, and quick surfaces
 
 **Owner:** `unassigned`
-**Status:** `done` (notes + autosave status, tasks toggle, import dry-run/export on new-tab; context-menu/popup/side-panel still deferred)
+**Status:** `done` (notes + autosave status, tasks toggle, import dry-run/export, thin action popup capture; context-menu/side-panel still deferred)
 **Touch set:** extension feature surfaces
 **Depends on:** T2.2, T3.2, T4.2
 
@@ -415,7 +415,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T9.2 — Recovery, browser E2E, and performance matrix
 
 **Owner:** `unassigned`
-**Status:** `in-progress` (Playwright extension E2E + recover message in CI via xvfb; 1k-item bench script recorded; 10k/50k + full interruption matrix still open)
+**Status:** `done` (journal-stage recovery matrix + saved+closeRequested resume; popup/newtab E2E; 1k/10k/50k benches recorded in CI artifacts — not hard gates)
 **Touch set:** shared fixtures, E2E, performance/recovery harness
 **Depends on:** T2.1, T3.1, T4.1
 
@@ -424,6 +424,8 @@ The landing page is a release feature, not an afterthought. It should communicat
 - Define reference hardware and record results instead of presenting targets as facts.
 
 **Targets:** warm new-tab p75 <300 ms; cold p75 <1 s; local command p95 <100 ms; indexed 10k search p95 <100 ms; zero known data-loss defects.
+
+**Shipped:** unit recovery matrix across `saved` / `saved+close` / `closing` / partial close / mid-`undoing` / terminal no-ops / fail-before-close; E2E popup capture + seeded closing recover; multi-size bench artifact. Remaining debt: true mid-write SW kill injection, package-size matrix, Plasmo-gated install/update drill (T4.1).
 
 ### T9.3 — Production and open-source release
 
@@ -484,11 +486,12 @@ A card is complete only when:
 ## 16. Current assignment
 
 ```md
-T9.2 — Recovery, browser E2E, and performance matrix
+T7.3 — Public developer and user docs (finish)
 Owner: unassigned
-Status: in-progress
-Touch set: shared fixtures, E2E, performance/recovery harness
-Next: expand interruption matrix + 10k/50k benches; keep T4.1 Plasmo deferred; do not start T8 sync
+Status: ready / partial
+Touch set: README.md, docs/**
+Next: contributor 15-minute setup verification + architecture diagrams
+Parked/deferred: T4.1 Plasmo; T8 sync until Gate C
 ```
 
-Claim the next ready card only after finishing or parking the active card, following the one-active-card rule. Ready/unblocked after this pass: T0.2, T4.1, T4.3 (unblocked by T2.2), T5.2, T7.1, T7.3. Hosted sync (T8) remains blocked until Gate C.
+Gate B remaining blocker is **T4.1 Plasmo** (intentionally deferred). Ready cards: T0.2, T5.2, T7.1, T7.3 finish, T9.3 (blocked on reviews). Hosted sync (T8) remains blocked until Gate C.

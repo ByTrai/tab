@@ -241,11 +241,37 @@ export class CaptureService {
     for (const operation of operations) {
       if (operation.stage === "closing") {
         recovered.push(await this.recoverClosing(operation));
+      } else if (operation.stage === "saved" && operation.closeRequested) {
+        // Worker died after durable save but before/during the closing transition.
+        recovered.push(await this.resumeCloseAfterSaved(operation));
       } else if (operation.stage === "undoing") {
         recovered.push(await this.undo(operation.id));
       }
     }
     return recovered;
+  }
+
+  /**
+   * Resumes a capture that reached the no-loss `saved` boundary with
+   * closeRequested=true before the worker was suspended.
+   */
+  async resumeCloseAfterSaved(operation) {
+    const closableIds = (operation.items ?? [])
+      .filter((item) => !item.pinned)
+      .map((item) => item.tabId);
+    const closing = {
+      ...operation,
+      stage: "closing",
+      closedTabIds: closableIds,
+      failedCloseIds: [],
+    };
+    await this.repository.updateOperation(closing);
+    if (closableIds.length === 0) {
+      const closed = { ...closing, stage: "closed", closedTabIds: [] };
+      await this.repository.updateOperation(closed);
+      return closed;
+    }
+    return this.recoverClosing(closing);
   }
 
   async recoverClosing(operation) {
