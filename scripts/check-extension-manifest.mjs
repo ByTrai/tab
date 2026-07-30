@@ -1,3 +1,7 @@
+/**
+ * Fail CI if the production extension gains unexpected privileges.
+ * optional_permissions may include contextMenus only (user-gated).
+ */
 import { readFile } from "node:fs/promises";
 
 const manifestPath = new URL(
@@ -11,6 +15,14 @@ const actualPermissions = [...(manifest.permissions ?? [])].sort();
 if (JSON.stringify(actualPermissions) !== JSON.stringify(expectedPermissions)) {
   throw new Error(
     `Extension permissions changed: expected ${JSON.stringify(expectedPermissions)}, received ${JSON.stringify(actualPermissions)}`,
+  );
+}
+
+const optional = [...(manifest.optional_permissions ?? [])].sort();
+const expectedOptional = ["contextMenus"];
+if (JSON.stringify(optional) !== JSON.stringify(expectedOptional)) {
+  throw new Error(
+    `Extension optional_permissions changed: expected ${JSON.stringify(expectedOptional)}, received ${JSON.stringify(optional)}`,
   );
 }
 

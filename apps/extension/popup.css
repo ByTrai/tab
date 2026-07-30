@@ -248,6 +248,29 @@ button.secondary {
   background: transparent;
 }
 
+.context-row {
+  margin: 0 14px 12px;
+  font-size: 12px;
+}
+
+.text-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.text-button:hover {
+  color: var(--foreground);
+}
+
+.muted {
+  color: var(--muted);
+}
+
 .toast {
   display: flex;
   align-items: center;

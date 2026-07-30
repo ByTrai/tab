@@ -13,6 +13,8 @@ const toast = document.querySelector("#toast");
 const toastCopy = document.querySelector("#toast-copy");
 const undoButton = document.querySelector("#undo");
 const openWorkspace = document.querySelector("#open-workspace");
+const enableContext = document.querySelector("#enable-context");
+const contextStatus = document.querySelector("#context-status");
 
 let inventory = [];
 let lastCommandId = null;
@@ -151,7 +153,36 @@ undoButton.addEventListener("click", async () => {
 
 openWorkspace.href = chrome.runtime.getURL("newtab.html");
 
-void loadInventory().catch((error) => {
-  status.textContent =
-    error instanceof Error ? error.message : "Tabby could not start.";
+async function syncContextMenuUi() {
+  try {
+    const { granted } = await request({ type: "contextMenusEnabled" });
+    enableContext.hidden = Boolean(granted);
+    contextStatus.hidden = !granted;
+  } catch {
+    enableContext.hidden = true;
+    contextStatus.hidden = true;
+  }
+}
+
+enableContext.addEventListener("click", async () => {
+  enableContext.disabled = true;
+  try {
+    const { granted } = await request({ type: "enableContextMenus" });
+    status.textContent = granted
+      ? "Right-click capture enabled"
+      : "Permission not granted";
+    await syncContextMenuUi();
+  } catch (error) {
+    status.textContent =
+      error instanceof Error ? error.message : "Could not enable context menu";
+  } finally {
+    enableContext.disabled = false;
+  }
 });
+
+void loadInventory()
+  .then(() => syncContextMenuUi())
+  .catch((error) => {
+    status.textContent =
+      error instanceof Error ? error.message : "Tabby could not start.";
+  });

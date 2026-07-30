@@ -498,6 +498,50 @@ export class CaptureService {
     return { workspace, group };
   }
 
+  /**
+   * Thin context-menu capture: page tab → journal capture; bare URL → inbox link.
+   * Never closes tabs from the context menu (explicit opt-in elsewhere).
+   */
+  async captureContextTarget({ commandId, url, title, tabId = null }) {
+    if (!commandId) throw new Error("A command id is required.");
+    const normalized = normalizeHttpUrl(url);
+    if (!normalized) {
+      throw new Error("Only http(s) links can be captured.");
+    }
+
+    if (Number.isInteger(tabId)) {
+      return this.capture({
+        commandId,
+        tabIds: [tabId],
+        close: false,
+        duplicatePolicy: "skip",
+      });
+    }
+
+    const inbox = await this.ensureDefaultInbox();
+    if (!inbox) {
+      throw new Error("Workspace organization store is unavailable.");
+    }
+
+    const existing = await this.entities.savedLinkItems();
+    const key = normalizedUrlKey(normalized);
+    if (existing.some((item) => normalizedUrlKey(item.url) === key)) {
+      return { skippedDuplicate: true, url: normalized };
+    }
+
+    const displayTitle =
+      (typeof title === "string" && title.trim()) ||
+      new URL(normalized).hostname;
+    return this.applyWorkspaceCommand({
+      type: "createItem",
+      commandId,
+      groupId: inbox.group.id,
+      kind: "link",
+      title: displayTitle,
+      url: normalized,
+    });
+  }
+
   async syncCapturedLinks(items) {
     if (!this.entities || !Array.isArray(items) || items.length === 0) return;
     const inbox = await this.ensureDefaultInbox();

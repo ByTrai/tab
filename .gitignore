@@ -20,6 +20,9 @@ next-env.d.ts
 
 # production
 /build
+/apps/extension-plasmo/build
+/apps/extension-plasmo/.plasmo
+/apps/extension-plasmo/node_modules
 
 # misc
 .DS_Store
