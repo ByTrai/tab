@@ -94,6 +94,13 @@ main {
   overflow: auto;
 }
 
+.popup-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
 .lede {
   margin: 0 0 12px;
   color: var(--muted);

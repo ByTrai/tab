@@ -266,7 +266,7 @@ After Sprint 6, prioritize observed private-alpha problems. Do not start sync me
 ### T5.2 — Accessibility verification
 
 **Owner:** `unassigned`
-**Status:** `blocked`
+**Status:** `done` (automated smoke + private-alpha audit doc; NVDA/VoiceOver full matrix and Lighthouse CI remain follow-ups)
 **Touch set:** accessibility tests/audit reports and small targeted fixes
 **Depends on:** T4.2, T6.1, T7.2
 
@@ -314,7 +314,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T7.1 — Information architecture, copy, and wireframe
 
 **Owner:** `unassigned`
-**Status:** `ready`
+**Status:** `done` (documented against shipped `/` in `docs/product-review/landing-ia.md`)
 **Touch set:** landing specification/content docs only
 **Depends on:** T0.1 for final brand/legal copy; may start with placeholders
 
@@ -344,7 +344,7 @@ The landing page is a release feature, not an afterthought. It should communicat
 ### T7.3 — Public developer and user docs
 
 **Owner:** `unassigned`
-**Status:** `in-progress` (backup/recovery guide added; full contributor timing drills + architecture diagrams still open)
+**Status:** `done` (backup guide, architecture overview, contributor ≤15m setup drill; optional docs site still future)
 **Touch set:** `README.md`, `docs/**`, future docs site
 **Depends on:** T0.1 for final contribution/security details
 
@@ -486,12 +486,11 @@ A card is complete only when:
 ## 16. Current assignment
 
 ```md
-T7.3 — Public developer and user docs (finish)
+T4.1 — Parallel Plasmo shell (parked)
 Owner: unassigned
-Status: ready / partial
-Touch set: README.md, docs/**
-Next: contributor 15-minute setup verification + architecture diagrams
-Parked/deferred: T4.1 Plasmo; T8 sync until Gate C
+Status: ready / deferred until private-alpha feedback
+Also ready: T0.2 user discovery
+Blocked: T8 sync, T9.3 release (needs reviews + observation period)
 ```
 
-Gate B remaining blocker is **T4.1 Plasmo** (intentionally deferred). Ready cards: T0.2, T5.2, T7.1, T7.3 finish, T9.3 (blocked on reviews). Hosted sync (T8) remains blocked until Gate C.
+Gate B’s only intentional deferral is **T4.1 Plasmo**. Local private-alpha docs/a11y cards (T5.2, T7.1, T7.3) are complete enough for observation. Do not start hosted sync (T8) until Gate C.

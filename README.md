@@ -5,7 +5,7 @@ Tabby is an open-source, local-first workspace for links, notes, and lightweight
 - a Next.js web alpha for organizing workspaces, groups, links, and notes; and
 - a dependency-free Chromium Manifest V3 extension that inventories the current window and performs restart-safe tab capture.
 
-Both clients work locally without an account. Synchronization, collaboration, and hosted production infrastructure are intentionally deferred. See [`roadmap.md`](roadmap.md) for the remaining work, topic ownership, and delivery order. User backup steps live in [`docs/user-guide/backup-and-recovery.md`](docs/user-guide/backup-and-recovery.md).
+Both clients work locally without an account. Synchronization, collaboration, and hosted production infrastructure are intentionally deferred. See [`roadmap.md`](roadmap.md) for the remaining work, topic ownership, and delivery order. User backup steps live in [`docs/user-guide/backup-and-recovery.md`](docs/user-guide/backup-and-recovery.md). Architecture boundaries are summarized in [`docs/architecture/overview.md`](docs/architecture/overview.md). New contributors should follow [`docs/contributor-setup.md`](docs/contributor-setup.md).
 
 > **Alpha warning:** browser data is stored in IndexedDB and can be lost when site or extension storage is cleared. Export a JSON backup before testing destructive browser/profile operations.
 

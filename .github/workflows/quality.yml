@@ -22,6 +22,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:extension
+      - run: npm run check:a11y
       - run: npm run check:manifest
       - run: npm run check:licenses
       - run: npm run audit:dependencies

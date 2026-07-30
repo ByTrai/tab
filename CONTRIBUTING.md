@@ -11,6 +11,8 @@ Thank you for helping build Tabby, a streamlined local-first tool for saving, or
 
 ## Set up the project
 
+Follow the timed checklist in [`docs/contributor-setup.md`](docs/contributor-setup.md), or:
+
 ```bash
 npm install
 cp .env.example .env
